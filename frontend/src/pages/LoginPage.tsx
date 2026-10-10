@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-do
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { AlertCircle, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { AUTH_ROLES, RoleAuthOption } from '../components/auth/AuthRoleModal';
 
 export const LoginPage: React.FC = () => {
@@ -133,20 +133,18 @@ export const LoginPage: React.FC = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
               {AUTH_ROLES.map((role) => {
-                const Icon = role.icon;
                 const isSelected = selectedRole?.id === role.id;
                 return (
                   <button
                     key={role.id}
                     type="button"
                     onClick={() => handleSelectRole(role)}
-                    className={`p-2 rounded-lg text-xs border flex flex-col items-center gap-1 transition cursor-pointer text-center ${
+                    className={`py-2 px-1.5 rounded-lg text-xs border flex items-center justify-center transition cursor-pointer text-center ${
                       isSelected
                         ? 'border-primary-600 bg-primary-100/40 text-primary-900 font-semibold shadow-xs ring-1 ring-primary-600'
                         : 'border-line bg-surface hover:bg-white text-ink-700 hover:border-ink-300'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${role.iconColor}`} />
                     <span className="text-[10px] leading-tight font-mono uppercase">{role.badge}</span>
                   </button>
                 );
@@ -157,7 +155,6 @@ export const LoginPage: React.FC = () => {
               <div className="mt-2 p-2.5 rounded-lg bg-surface border border-line text-xs flex items-center justify-between gap-2 animate-in fade-in">
                 <div className="min-w-0">
                   <p className="font-semibold text-ink-950 truncate flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-primary-600" />
                     <span>{selectedRole.name}</span>
                     <span className="text-ink-400 font-mono text-[10px]">({selectedRole.username})</span>
                   </p>

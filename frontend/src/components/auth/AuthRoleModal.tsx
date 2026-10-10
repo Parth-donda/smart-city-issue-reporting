@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShieldAlert,
-  Building2,
-  ShieldCheck,
-  HardHat,
-  UserCheck,
   X,
   ArrowRight,
   KeyRound,
@@ -28,9 +24,6 @@ export interface RoleAuthOption {
   roleType: string;
   dashboardRoute: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  iconBg: string;
-  iconColor: string;
 }
 
 export const AUTH_ROLES: RoleAuthOption[] = [
@@ -44,9 +37,6 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'MUNICIPAL_ADMIN',
     dashboardRoute: '/admin',
     description: 'City-wide oversight, department SLAs, system parameters & analytics.',
-    icon: ShieldAlert,
-    iconBg: 'bg-purple-50 border-purple-200',
-    iconColor: 'text-purple-700',
   },
   {
     id: 'officer',
@@ -58,9 +48,6 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'DEPARTMENT_OFFICER',
     dashboardRoute: '/officer',
     description: 'Triage grievances, verify evidence & allocate tasks to field teams.',
-    icon: Building2,
-    iconBg: 'bg-blue-50 border-blue-200',
-    iconColor: 'text-blue-700',
   },
   {
     id: 'supervisor',
@@ -72,9 +59,6 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'SUPERVISOR',
     dashboardRoute: '/supervisor',
     description: 'SLA monitoring, escalation approval, and quality verification audits.',
-    icon: ShieldCheck,
-    iconBg: 'bg-amber-50 border-amber-200',
-    iconColor: 'text-amber-700',
   },
   {
     id: 'worker',
@@ -86,9 +70,6 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'WORKER',
     dashboardRoute: '/worker',
     description: 'On-site execution, work order checklists & before/after resolution photos.',
-    icon: HardHat,
-    iconBg: 'bg-emerald-50 border-emerald-200',
-    iconColor: 'text-emerald-700',
   },
   {
     id: 'citizen',
@@ -100,9 +81,6 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'CITIZEN',
     dashboardRoute: '/citizen',
     description: 'Report civic issues, attach geotagged evidence & confirm ticket closures.',
-    icon: UserCheck,
-    iconBg: 'bg-teal-50 border-teal-200',
-    iconColor: 'text-primary-700',
   },
 ];
 
@@ -180,24 +158,17 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
         {/* Roles List */}
         <div className="p-5 sm:p-6 max-h-[62vh] overflow-y-auto space-y-2.5">
           {AUTH_ROLES.map((role) => {
-            const Icon = role.icon;
             const isLoading = loadingRoleId === role.id;
             return (
               <div
                 key={role.id}
                 className="group p-3.5 sm:p-4 rounded-xl border border-slate-200 hover:border-primary-600/70 bg-slate-50/50 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:shadow-sm"
               >
-                <div className="flex items-start gap-3.5 min-w-0">
-                  <div
-                    className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${role.iconBg} ${role.iconColor}`}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
-                        {role.name}
-                      </span>
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
+                      {role.name}
+                    </span>
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${role.badgeColor}`}
                       >
@@ -217,7 +188,6 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                       </span>
                     </div>
                   </div>
-                </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pt-2 sm:pt-0">
                   <button

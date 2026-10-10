@@ -55,7 +55,6 @@ export const OfficerDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
-  const [departmentFilter, setDepartmentFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('created_desc');
 
@@ -80,7 +79,7 @@ export const OfficerDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const [sumData, catData, deptData, workerData] = await Promise.all([
-        api.getDepartmentSummary(departmentFilter),
+        api.getDepartmentSummary(),
         api.getCategories(),
         api.getDepartments(),
         api.getDepartmentWorkers(),
@@ -127,7 +126,6 @@ export const OfficerDashboard: React.FC = () => {
         status: statusParam,
         priority: priorityFilter !== 'ALL' ? priorityFilter : undefined,
         category: categoryFilter !== 'ALL' ? categoryFilter : undefined,
-        department: departmentFilter !== 'ALL' ? departmentFilter : 'ALL',
         search: searchQuery || undefined,
         ordering,
       });
@@ -147,8 +145,8 @@ export const OfficerDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchQueueIssues();
-    api.getDepartmentSummary(departmentFilter).then(setSummary);
-  }, [activeTab, priorityFilter, categoryFilter, departmentFilter, sortOrder]);
+    api.getDepartmentSummary().then(setSummary);
+  }, [activeTab, priorityFilter, categoryFilter, sortOrder]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,7 +187,7 @@ export const OfficerDashboard: React.FC = () => {
         const updated = await api.startReview(fullDetail.issue_id);
         setActiveIssue(updated);
         // Refresh summary
-        api.getDepartmentSummary(departmentFilter).then(setSummary);
+        api.getDepartmentSummary().then(setSummary);
       }
     } catch {
       setActiveIssue(issue);
@@ -201,7 +199,7 @@ export const OfficerDashboard: React.FC = () => {
     setActiveIssue(null);
     setActionError(null);
     fetchQueueIssues();
-    api.getDepartmentSummary(departmentFilter).then(setSummary);
+    api.getDepartmentSummary().then(setSummary);
   };
 
   // Action Handlers
@@ -416,8 +414,8 @@ export const OfficerDashboard: React.FC = () => {
             })}
           </div>
 
-          {/* Bottom Row: Search, Department, Priority, Category, Sorting */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-1">
+          {/* Bottom Row: Search, Priority, Category, Sorting */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
             <form onSubmit={handleSearch} className="relative">
               <Search className="w-4 h-4 text-ink-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -428,19 +426,6 @@ export const OfficerDashboard: React.FC = () => {
                 className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface border border-line rounded-input focus:outline-none focus:ring-2 focus:ring-primary-600"
               />
             </form>
-
-            <select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-surface border border-line rounded-input text-ink-950 focus:outline-none focus:ring-2 focus:ring-primary-600"
-            >
-              <option value="ALL">All Municipal Departments</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} ({d.code})
-                </option>
-              ))}
-            </select>
 
             <select
               value={priorityFilter}

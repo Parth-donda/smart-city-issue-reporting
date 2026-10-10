@@ -39,14 +39,7 @@ class IssueSummaryView(APIView):
         if user.role == Role.CITIZEN:
             qs = qs.filter(citizen=user)
         elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR]:
-            if dept_param == 'ALL':
-                pass
-            elif dept_param and dept_param != 'ALL':
-                if dept_param.isdigit():
-                    qs = qs.filter(department_id=dept_param)
-                else:
-                    qs = qs.filter(department__code=dept_param)
-            elif user.department:
+            if user.department:
                 qs = qs.filter(department=user.department)
         elif user.role == Role.WORKER:
             qs = qs.filter(assigned_worker=user)
@@ -143,14 +136,7 @@ class IssueListCreateView(generics.ListCreateAPIView):
         if user.role == Role.CITIZEN:
             queryset = queryset.filter(citizen=user)
         elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR]:
-            if dept_param == 'ALL':
-                pass # Allow cross-department inspection
-            elif dept_param and dept_param != 'ALL':
-                if dept_param.isdigit():
-                    queryset = queryset.filter(department_id=dept_param)
-                else:
-                    queryset = queryset.filter(department__code=dept_param)
-            elif user.department:
+            if user.department:
                 queryset = queryset.filter(department=user.department)
         elif user.role == Role.WORKER:
             queryset = queryset.filter(assigned_worker=user)

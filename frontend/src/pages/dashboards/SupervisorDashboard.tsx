@@ -24,10 +24,6 @@ export const SupervisorDashboard: React.FC = () => {
 
   const [issues, setIssues] = useState<Issue[]>([]);
   const [summary, setSummary] = useState<QueueSummary | null>(null);
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [departmentFilter, setDepartmentFilter] = useState<string>(
-    user?.department ? String(user.department) : 'ALL'
-  );
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -39,23 +35,18 @@ export const SupervisorDashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadData = async (dept = departmentFilter) => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      const [sumData, issueRes, deptData] = await Promise.all([
-        api.getDepartmentSummary(dept),
+      const [sumData, issueRes] = await Promise.all([
+        api.getDepartmentSummary(),
         api.getIssues({
           status: 'DONE', // Awaiting verification
-          department: dept !== 'ALL' ? dept : 'ALL',
         }),
-        api.getDepartments().catch(() => []),
       ]);
       setSummary(sumData);
       const list = Array.isArray(issueRes) ? issueRes : issueRes.results || [];
       setIssues(list);
-      if (deptData && deptData.length > 0) {
-        setDepartments(deptData);
-      }
     } catch (err) {
       console.error('Failed to load supervisor data', err);
     } finally {
@@ -64,8 +55,8 @@ export const SupervisorDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData(departmentFilter);
-  }, [departmentFilter]);
+    loadData();
+  }, []);
 
   const handleOpenReview = async (issue: Issue) => {
     setActionError(null);
@@ -93,7 +84,7 @@ export const SupervisorDashboard: React.FC = () => {
       });
       setIsDrawerOpen(false);
       setSelectedIssue(null);
-      loadData(departmentFilter);
+      loadData();
     } catch (err: any) {
       setActionError(err.detail || err.error || 'Failed to verify issue.');
     } finally {
@@ -116,7 +107,7 @@ export const SupervisorDashboard: React.FC = () => {
       });
       setIsDrawerOpen(false);
       setSelectedIssue(null);
-      loadData(departmentFilter);
+      loadData();
     } catch (err: any) {
       setActionError(err.detail || err.error || 'Failed to reject verification.');
     } finally {
@@ -134,7 +125,7 @@ export const SupervisorDashboard: React.FC = () => {
               SUPERVISOR VERIFICATION DESK
             </span>
             <span className="text-xs text-ink-500 font-mono">
-              Dept: {user?.department_name || summary?.department_name || 'All Municipal Departments'}
+              Dept: {user?.department_name || summary?.department_name || 'Department Desk'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-ink-950 mt-1">
@@ -145,24 +136,10 @@ export const SupervisorDashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {departments.length > 0 && (
-            <select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="h-9 px-3 text-xs bg-surface border border-line rounded-input text-ink-700 font-medium focus:outline-none focus:ring-1 focus:ring-primary-500"
-            >
-              <option value="ALL">All Departments</option>
-              {departments.map((d) => (
-                <option key={d.id} value={String(d.id)}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          )}
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => loadData(departmentFilter)}
+            onClick={loadData}
             leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
           >
             Refresh Desk

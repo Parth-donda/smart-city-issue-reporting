@@ -9,17 +9,14 @@ import { api } from '../../services/api';
 import { Issue, QueueSummary } from '../../types/issues';
 import {
   ShieldCheck,
-  CheckCircle2,
   XCircle,
-  Clock,
   MapPin,
   RefreshCw,
   Inbox,
   AlertTriangle,
   ArrowRight,
   Check,
-  X,
-  Wrench
+  X
 } from 'lucide-react';
 
 export const SupervisorDashboard: React.FC = () => {
@@ -151,58 +148,46 @@ export const SupervisorDashboard: React.FC = () => {
       {/* KPI Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-primary-600">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
-                Awaiting Verification
-              </span>
-              <div className="text-2xl font-bold font-heading text-ink-950 mt-1">
-                {issues.length}
-              </div>
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
+              Awaiting Verification
+            </span>
+            <div className="text-2xl font-bold font-heading text-ink-950 mt-1">
+              {issues.length}
             </div>
-            <Clock className="w-8 h-8 text-primary-600" />
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-status-in-progress">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
-                Active in Field
-              </span>
-              <div className="text-2xl font-bold font-heading text-ink-950 mt-1">
-                {summary?.in_progress || summary?.assigned || 0}
-              </div>
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
+              Active in Field
+            </span>
+            <div className="text-2xl font-bold font-heading text-ink-950 mt-1">
+              {summary?.in_progress || summary?.assigned || 0}
             </div>
-            <Wrench className="w-8 h-8 text-status-in-progress" />
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-semantic-success">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
-                Verified & Closed
-              </span>
-              <div className="text-2xl font-bold font-heading text-semantic-success mt-1">
-                {(summary?.verified || 0) + (summary?.closed || 0)}
-              </div>
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
+              Verified & Closed
+            </span>
+            <div className="text-2xl font-bold font-heading text-semantic-success mt-1">
+              {(summary?.verified || 0) + (summary?.closed || 0)}
             </div>
-            <CheckCircle2 className="w-8 h-8 text-semantic-success" />
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-status-reopened">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
-                Reopened Tickets
-              </span>
-              <div className="text-2xl font-bold font-heading text-status-reopened mt-1">
-                {summary?.reopened || 0}
-              </div>
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider font-semibold">
+              Reopened Tickets
+            </span>
+            <div className="text-2xl font-bold font-heading text-status-reopened mt-1">
+              {summary?.reopened || 0}
             </div>
-            <AlertTriangle className="w-8 h-8 text-status-reopened" />
           </CardContent>
         </Card>
       </div>

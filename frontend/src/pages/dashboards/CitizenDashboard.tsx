@@ -10,7 +10,6 @@ import { api } from '../../services/api';
 import { Issue } from '../../types/issues';
 import {
   Plus,
-  Clock,
   CheckCircle2,
   AlertTriangle,
   MapPin,
@@ -147,32 +146,23 @@ export const CitizenDashboard: React.FC = () => {
       {/* KPI Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-primary-700">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Total Submissions</span>
-              <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{issues.length}</div>
-            </div>
-            <Clock className="w-8 h-8 text-ink-300" />
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Total Submissions</span>
+            <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{issues.length}</div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-accent-500">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Active in Field</span>
-              <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{inProgressCount}</div>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-accent-500" />
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Active in Field</span>
+            <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{inProgressCount}</div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-semantic-success">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Resolved & Closed</span>
-              <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{resolvedCount}</div>
-            </div>
-            <CheckCircle2 className="w-8 h-8 text-semantic-success" />
+          <CardContent className="p-4">
+            <span className="text-xs text-ink-500 font-mono uppercase tracking-wider">Resolved & Closed</span>
+            <div className="text-2xl font-bold font-heading text-ink-950 mt-1">{resolvedCount}</div>
           </CardContent>
         </Card>
       </div>

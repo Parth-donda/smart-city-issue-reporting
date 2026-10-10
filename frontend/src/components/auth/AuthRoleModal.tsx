@@ -111,10 +111,7 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     dashboardRoute: '/citizen',
     description: 'Report civic issues, attach geotagged evidence & confirm ticket closures.',
     persons: [
-      { username: 'Parth_Donda', name: 'Parth Donda', department: 'Registered Citizen', password: 'Parth123' },
-      { username: 'citizen', name: 'Aarav Sharma', department: 'Verified Citizen', password: 'pass123' },
-      { username: 'citizen2', name: 'Pooja Patel', department: 'Verified Citizen', password: 'pass123' },
-      { username: 'citizen3', name: 'Rohan Mehta', department: 'Verified Citizen', password: 'pass123' },
+      { username: 'citizen', name: 'Citizen Public Access', department: 'Public Citizen', password: 'pass123' },
     ],
   },
 ];
@@ -155,7 +152,7 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900"
+        className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -192,7 +189,7 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
         )}
 
         {/* Roles List */}
-        <div className="p-5 sm:p-6 max-h-[62vh] overflow-y-auto space-y-2.5">
+        <div className="p-5 sm:p-6 max-h-[62vh] overflow-y-auto space-y-3">
           {AUTH_ROLES.map((role) => {
             const isLoading = loadingRoleId === role.id;
             const activePerson =
@@ -207,9 +204,9 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
             return (
               <div
                 key={role.id}
-                className="group p-3.5 sm:p-4 rounded-xl border border-slate-200 hover:border-primary-600/70 bg-slate-50/50 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:shadow-sm"
+                className="group p-4 rounded-xl border border-slate-200 hover:border-primary-600/70 bg-slate-50/50 hover:bg-white transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs hover:shadow-sm"
               >
-                <div className="min-w-0 space-y-1.5 flex-1">
+                <div className="min-w-0 space-y-2 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
                       {role.name}
@@ -224,12 +221,12 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                     {role.description}
                   </p>
 
-                  {/* Person / Department Selector */}
-                  {role.persons.length > 1 && (
-                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider shrink-0">
-                        Person:
-                      </span>
+                  {/* Person / Department Selector (Hidden for Citizen for privacy) */}
+                  {role.id !== 'citizen' && role.persons.length > 1 && (
+                    <div className="pt-1 space-y-1 w-full max-w-lg">
+                      <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
+                        Select Account / Department:
+                      </label>
                       <select
                         value={activePerson.username}
                         onChange={(e) => {
@@ -238,7 +235,7 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                             setSelectedPersons((prev) => ({ ...prev, [role.id]: found }));
                           }
                         }}
-                        className="text-xs bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-900 font-medium hover:border-primary-500 focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden transition-colors cursor-pointer max-w-full sm:max-w-xs"
+                        className="w-full text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-medium hover:border-primary-500 focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden transition-colors cursor-pointer shadow-2xs"
                       >
                         {role.persons.map((person) => (
                           <option key={person.username} value={person.username}>
@@ -257,7 +254,7 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                     <span className="font-mono text-[11px] text-slate-500">
                       Pass: <strong className="text-slate-800">{activePerson.password}</strong>
                     </span>
-                    {activePerson.department && activePerson.department !== 'Registered Citizen' && activePerson.department !== 'Verified Citizen' && (
+                    {activePerson.department && activePerson.department !== 'Public Citizen' && (
                       <>
                         <span className="text-slate-300">•</span>
                         <span className="text-[11px] text-slate-600 font-medium">{activePerson.department}</span>

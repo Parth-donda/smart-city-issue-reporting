@@ -129,7 +129,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Right Form Panel */}
       <div className="lg:w-7/12 p-6 sm:p-12 lg:p-16 flex items-center justify-center">
-        <div className="w-full max-w-lg space-y-6">
+        <div className="w-full max-w-xl space-y-6">
           <div>
             <h2 className="text-2xl font-heading font-bold text-ink-950">Sign In to Your Workspace</h2>
             <p className="text-sm text-ink-500 mt-1">
@@ -138,7 +138,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Quick Role Selection Bar */}
-          <div className="space-y-2 p-3 bg-card border border-line rounded-xl shadow-xs">
+          <div className="space-y-2 p-3.5 bg-card border border-line rounded-xl shadow-xs">
             <div className="flex items-center justify-between text-xs px-1">
               <span className="font-semibold text-ink-700">Choose Role Option:</span>
               {selectedRole ? (
@@ -175,7 +175,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {selectedRole && (
-              <div className="mt-2.5 p-3 rounded-xl bg-surface border border-line text-xs space-y-2.5 animate-in fade-in">
+              <div className="mt-2.5 p-3.5 rounded-xl bg-surface border border-line text-xs space-y-2.5 animate-in fade-in">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-semibold text-ink-950 truncate flex items-center gap-2">
@@ -199,11 +199,12 @@ export const LoginPage: React.FC = () => {
                   </Button>
                 </div>
 
-                {selectedRole.persons && selectedRole.persons.length > 1 && (
-                  <div className="pt-2 border-t border-line/60 flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="text-[11px] font-medium text-ink-600 shrink-0">
-                      Select Person / Department:
-                    </span>
+                {/* Account / Department Selector (Hidden for Citizen for privacy) */}
+                {selectedRole.id !== 'citizen' && selectedRole.persons && selectedRole.persons.length > 1 && (
+                  <div className="pt-2 border-t border-line/60 space-y-1.5">
+                    <label className="block text-[11px] font-semibold text-ink-600 uppercase tracking-wider">
+                      Select Account / Department:
+                    </label>
                     <select
                       value={username}
                       onChange={(e) => {
@@ -213,7 +214,7 @@ export const LoginPage: React.FC = () => {
                           setPassword(person.password);
                         }
                       }}
-                      className="text-xs bg-white border border-line rounded-lg px-2.5 py-1 text-ink-900 font-medium focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden cursor-pointer w-full sm:w-auto"
+                      className="w-full text-xs bg-white border border-line rounded-lg px-3 py-2 text-ink-900 font-medium focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden cursor-pointer shadow-xs"
                     >
                       {selectedRole.persons.map((person) => (
                         <option key={person.username} value={person.username}>

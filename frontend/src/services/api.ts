@@ -150,8 +150,9 @@ class ApiService {
   }
 
   // --- Issues Queue & Management ---
-  public async getDepartmentSummary(): Promise<QueueSummary> {
-    return this.request<QueueSummary>('/issues/summary/');
+  public async getDepartmentSummary(department?: string | number): Promise<QueueSummary> {
+    const query = department ? `?department=${department}` : '';
+    return this.request<QueueSummary>(`/issues/summary/${query}`);
   }
 
   public async getIssues(params: {
@@ -167,8 +168,12 @@ class ApiService {
   } = {}): Promise<{ count: number; results: Issue[] } | Issue[]> {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => {
-      if (val !== undefined && val !== null && val !== '' && val !== 'ALL') {
-        query.append(key, String(val));
+      if (val !== undefined && val !== null && val !== '') {
+        if (key === 'department' && val === 'ALL') {
+          query.append('department', 'ALL');
+        } else if (val !== 'ALL') {
+          query.append(key, String(val));
+        }
       }
     });
     const queryString = query.toString() ? `?${query.toString()}` : '';

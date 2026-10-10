@@ -24,6 +24,10 @@ export const SupervisorDashboard: React.FC = () => {
 
   const [issues, setIssues] = useState<Issue[]>([]);
   const [summary, setSummary] = useState<QueueSummary | null>(null);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [departmentFilter, setDepartmentFilter] = useState<string>(
+    user?.department ? String(user.department) : 'ALL'
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -35,16 +39,23 @@ export const SupervisorDashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (dept = departmentFilter) => {
     setIsLoading(true);
     try {
-      const [sumData, issueRes] = await Promise.all([
-        api.getDepartmentSummary(),
-        api.getIssues({ status: 'DONE' }), // Awaiting verification
+      const [sumData, issueRes, deptData] = await Promise.all([
+        api.getDepartmentSummary(dept),
+        api.getIssues({
+          status: 'DONE', // Awaiting verification
+          department: dept !== 'ALL' ? dept : 'ALL',
+        }),
+        api.getDepartments().catch(() => []),
       ]);
       setSummary(sumData);
       const list = Array.isArray(issueRes) ? issueRes : issueRes.results || [];
       setIssues(list);
+      if (deptData && deptData.length > 0) {
+        setDepartments(deptData);
+      }
     } catch (err) {
       console.error('Failed to load supervisor data', err);
     } finally {
@@ -53,8 +64,8 @@ export const SupervisorDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(departmentFilter);
+  }, [departmentFilter]);
 
   const handleOpenReview = async (issue: Issue) => {
     setActionError(null);
@@ -82,7 +93,7 @@ export const SupervisorDashboard: React.FC = () => {
       });
       setIsDrawerOpen(false);
       setSelectedIssue(null);
-      loadData();
+      loadData(departmentFilter);
     } catch (err: any) {
       setActionError(err.detail || err.error || 'Failed to verify issue.');
     } finally {
@@ -105,7 +116,7 @@ export const SupervisorDashboard: React.FC = () => {
       });
       setIsDrawerOpen(false);
       setSelectedIssue(null);
-      loadData();
+      loadData(departmentFilter);
     } catch (err: any) {
       setActionError(err.detail || err.error || 'Failed to reject verification.');
     } finally {
@@ -123,7 +134,7 @@ export const SupervisorDashboard: React.FC = () => {
               SUPERVISOR VERIFICATION DESK
             </span>
             <span className="text-xs text-ink-500 font-mono">
-              Dept: {summary?.department_name || user?.department_name || 'Roads & Infrastructure'}
+              Dept: {user?.department_name || summary?.department_name || 'All Municipal Departments'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-ink-950 mt-1">
@@ -134,10 +145,24 @@ export const SupervisorDashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {departments.length > 0 && (
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="h-9 px-3 text-xs bg-surface border border-line rounded-input text-ink-700 font-medium focus:outline-none focus:ring-1 focus:ring-primary-500"
+            >
+              <option value="ALL">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={String(d.id)}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          )}
           <Button
             variant="secondary"
             size="sm"
-            onClick={loadData}
+            onClick={() => loadData(departmentFilter)}
             leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
           >
             Refresh Desk
@@ -211,7 +236,7 @@ export const SupervisorDashboard: React.FC = () => {
             <thead>
               <tr className="bg-surface/80 border-b border-line text-ink-500 font-mono uppercase text-[11px]">
                 <th className="py-3 px-4 font-semibold">Issue Ref</th>
-                <th className="py-3 px-4 font-semibold">Title</th>
+                <th className="py-3 px-4 font-semibold">Title & Department</th>
                 <th className="py-3 px-4 font-semibold">Technician</th>
                 <th className="py-3 px-4 font-semibold">Priority</th>
                 <th className="py-3 px-4 font-semibold">Status</th>
@@ -246,7 +271,15 @@ export const SupervisorDashboard: React.FC = () => {
                     <td className="py-3 px-4 font-mono font-bold text-primary-700">{issue.issue_id}</td>
                     <td className="py-3 px-4">
                       <p className="font-semibold text-ink-950 truncate max-w-xs">{issue.title}</p>
-                      <span className="text-[11px] text-ink-500">{issue.category?.name}</span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-ink-500 mt-0.5">
+                        <span>{issue.category?.name}</span>
+                        {(issue.department?.name || issue.department_name) && (
+                          <>
+                            <span>•</span>
+                            <span className="text-primary-700 font-medium">{issue.department?.name || issue.department_name}</span>
+                          </>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 font-mono text-xs">{issue.assigned_worker_name || 'Technician'}</td>
                     <td className="py-3 px-4">

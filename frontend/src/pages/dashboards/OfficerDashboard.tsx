@@ -80,7 +80,7 @@ export const OfficerDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const [sumData, catData, deptData, workerData] = await Promise.all([
-        api.getDepartmentSummary(),
+        api.getDepartmentSummary(departmentFilter),
         api.getCategories(),
         api.getDepartments(),
         api.getDepartmentWorkers(),
@@ -147,6 +147,7 @@ export const OfficerDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchQueueIssues();
+    api.getDepartmentSummary(departmentFilter).then(setSummary);
   }, [activeTab, priorityFilter, categoryFilter, departmentFilter, sortOrder]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -172,12 +173,23 @@ export const OfficerDashboard: React.FC = () => {
       const fullDetail = await api.getIssueDetail(issue.issue_id);
       setActiveIssue(fullDetail);
 
+      // Fetch workers for ticket department if cross-department
+      if (fullDetail.department?.id) {
+        try {
+          const deptWorkers = await api.getDepartmentWorkers(fullDetail.department.id);
+          if (deptWorkers && deptWorkers.length > 0) {
+            setWorkers(deptWorkers);
+            setSelectedWorkerId(String(deptWorkers[0].id));
+          }
+        } catch {}
+      }
+
       // If status is SUBMITTED, automatically transition to UNDER_REVIEW
       if (fullDetail.status === 'SUBMITTED') {
         const updated = await api.startReview(fullDetail.issue_id);
         setActiveIssue(updated);
         // Refresh summary
-        api.getDepartmentSummary().then(setSummary);
+        api.getDepartmentSummary(departmentFilter).then(setSummary);
       }
     } catch {
       setActiveIssue(issue);
@@ -189,7 +201,7 @@ export const OfficerDashboard: React.FC = () => {
     setActiveIssue(null);
     setActionError(null);
     fetchQueueIssues();
-    api.getDepartmentSummary().then(setSummary);
+    api.getDepartmentSummary(departmentFilter).then(setSummary);
   };
 
   // Action Handlers

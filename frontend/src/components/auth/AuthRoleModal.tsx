@@ -61,6 +61,7 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     description: 'Triage grievances, verify evidence & allocate tasks to field teams.',
     persons: [
       { username: 'officer', name: 'Vikram Deshmukh', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'officer_traffic', name: 'Kunal Patel', department: 'Traffic Management & Signage', password: 'pass123' },
       { username: 'officer_elec', name: 'Suresh Rane', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'officer_water', name: 'Mahesh Jadhav', department: 'Water Supply & Sewerage', password: 'pass123' },
       { username: 'officer_san', name: 'Anita Gupta', department: 'Solid Waste & Sanitation', password: 'pass123' },
@@ -78,8 +79,10 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     description: 'SLA monitoring, escalation approval, and quality verification audits.',
     persons: [
       { username: 'supervisor', name: 'Anjali Patil', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'sup_traffic', name: 'Pooja Sharma', department: 'Traffic Management & Signage', password: 'pass123' },
       { username: 'sup_elec', name: 'Kishore Verma', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'sup_water', name: 'Dinesh Kulkarni', department: 'Water Supply & Sewerage', password: 'pass123' },
+      { username: 'sup_san', name: 'Manish Rawat', department: 'Solid Waste & Sanitation', password: 'pass123' },
     ],
   },
   {
@@ -94,6 +97,7 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     description: 'On-site execution, work order checklists & before/after resolution photos.',
     persons: [
       { username: 'worker', name: 'Rajesh Kumar', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'worker_traffic', name: 'Arun Yadav', department: 'Traffic Management & Signage', password: 'pass123' },
       { username: 'worker2', name: 'Sunil Shinde', department: 'Roads & Infrastructure', password: 'pass123' },
       { username: 'worker_elec', name: 'Ramesh Nair', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'worker_water', name: 'Ganesh Pawar', department: 'Water Supply & Sewerage', password: 'pass123' },

@@ -15,7 +15,6 @@ import {
   LogIn,
   LayoutDashboard,
   LogOut,
-  MapPin,
   Menu,
   X,
   ArrowRight,
@@ -393,89 +392,94 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Live Municipal Operations Card */}
+          {/* Right Column: Municipal Service Standards & Citizen Charter */}
           <div className="lg:col-span-5 relative">
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-lg p-6 space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md p-6 space-y-5">
               
               {/* Card Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <h3 className="text-sm font-heading font-bold text-slate-900">
-                    Live Operations Overview
-                  </h3>
-                </div>
-                <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md font-medium">
-                  Ward 04 • Central Zone
-                </span>
+              <div className="pb-3 border-b border-slate-100">
+                <h3 className="text-base font-heading font-bold text-slate-900">
+                  Municipal Service Standards
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Time-bound civic redressal commitments across city wards
+                </p>
               </div>
 
-              {/* KPI Summary */}
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/70 text-center">
-                  <div className="text-base font-bold font-mono text-slate-900">18.4h</div>
-                  <div className="text-[11px] text-slate-500 font-medium">Avg Fix Time</div>
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/70 text-center">
-                  <div className="text-base font-bold font-mono text-emerald-700">98.2%</div>
-                  <div className="text-[11px] text-slate-500 font-medium">Resolved</div>
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/70 text-center">
-                  <div className="text-base font-bold font-mono text-slate-900">24 Crews</div>
-                  <div className="text-[11px] text-slate-500 font-medium">Active Today</div>
-                </div>
-              </div>
-
-              {/* Active Ticket Preview */}
-              <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/90 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-primary-700">
-                    TICKET #SC-2026-00104
-                  </span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 bg-amber-100 text-amber-800 rounded">
-                    In Progress
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">Road Pothole Resurfacing</h4>
-                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-primary-700 shrink-0" /> 5th Avenue & Elm St, Ward 4
+              {/* Department Commitments List */}
+              <div className="space-y-2.5">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900">Roads & Infrastructure</span>
+                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
+                      Within 48h
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                    Potholes, damaged tarmac, broken footpaths, and open utility trenches.
                   </p>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-slate-600">
-                    <span>Field Repair Status</span>
-                    <span className="text-primary-700 font-semibold">75% Complete</span>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900">Water Supply & Sewerage</span>
+                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
+                      Within 24h
+                    </span>
                   </div>
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary-600 rounded-full" style={{ width: '75%' }} />
-                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                    Pipeline bursts, contaminated tap water, low pressure, and sewer overflow.
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-1 text-xs text-slate-500">
-                  <span>Assigned: Roads Unit #07</span>
-                  <span className="font-medium text-amber-700">Target: 6h remaining</span>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900">Street Lighting & Electrical</span>
+                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
+                      Within 24h
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                    Dark street corridors, non-functional sodium/LED fixtures, and loose cables.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900">Solid Waste & Sanitation</span>
+                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
+                      Within 12h
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                    Overflowing community dumpsters, missed door-to-door collection, and litter.
+                  </p>
                 </div>
               </div>
 
-              {/* Recent Verified Activity */}
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Recent Verified Fixes
+              {/* Quality & Verification Protocol */}
+              <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                <div className="flex items-center justify-between text-slate-600">
+                  <span className="font-medium text-[11px]">Field Proof Standard:</span>
+                  <span className="text-emerald-700 font-semibold text-[11px]">Geotagged Before & After Photos</span>
                 </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/60">
-                    <span className="text-slate-800 truncate mr-2">Water Main Leak Repaired (Ward 2)</span>
-                    <span className="text-[11px] text-emerald-700 font-semibold shrink-0">Fixed in 4h</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/60">
-                    <span className="text-slate-800 truncate mr-2">Streetlight Replaced (Park Lane)</span>
-                    <span className="text-[11px] text-emerald-700 font-semibold shrink-0">Fixed in 12h</span>
-                  </div>
+                <div className="flex items-center justify-between text-slate-600">
+                  <span className="font-medium text-[11px]">Citizen Reopen Right:</span>
+                  <span className="text-slate-800 font-medium text-[11px]">Reopen within 48h if unsatisfied</span>
                 </div>
+              </div>
+
+              {/* Central Civic Control Room */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div>
+                  <div className="text-[11px] font-semibold text-slate-900">Central Municipal Control Room</div>
+                  <div className="text-xs text-slate-600">Helpline: <strong className="text-primary-700">1800-11-2026</strong> (Toll-Free, 24×7)</div>
+                </div>
+                <Link to="/report" className="shrink-0">
+                  <Button variant="primary" size="sm" className="bg-primary-700 hover:bg-primary-800 text-white text-xs px-3.5 py-1.5 shadow-xs">
+                    File Complaint
+                  </Button>
+                </Link>
               </div>
 
             </div>

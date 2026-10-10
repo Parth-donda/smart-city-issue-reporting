@@ -130,12 +130,9 @@ export const HomePage: React.FC = () => {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[76px] py-3.5 flex items-center justify-between gap-4">
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-primary-700 text-white font-heading font-bold text-lg flex items-center justify-center shadow-xs group-hover:bg-primary-800 transition-colors flex-shrink-0">
-              SC
-            </div>
+          <Link to="/" className="flex items-center group">
             <div className="flex flex-col justify-center">
-              <span className="font-heading font-bold text-xl text-slate-900 tracking-tight leading-tight group-hover:text-primary-700 transition-colors">
+              <span className="font-heading font-bold text-2xl text-slate-900 tracking-tight leading-tight group-hover:text-primary-700 transition-colors">
                 SmartCivic
               </span>
               <span className="text-[11px] text-slate-500 font-medium leading-tight">
@@ -737,11 +734,8 @@ export const HomePage: React.FC = () => {
       <footer className="bg-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-800">
           <div className="space-y-3 md:col-span-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary-700 text-white font-bold text-sm flex items-center justify-center">
-                SC
-              </div>
-              <span className="font-heading font-bold text-lg text-white">SmartCivic</span>
+            <div className="flex items-center">
+              <span className="font-heading font-bold text-xl text-white">SmartCivic</span>
             </div>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
               Civic issue reporting and public infrastructure maintenance tracking for citizens and municipal staff.

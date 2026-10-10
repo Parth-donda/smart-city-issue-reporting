@@ -361,7 +361,7 @@ export const ReportIssuePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6">
+    <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 pb-28">
       {/* Top Header */}
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-ink-950">Report a Civic Issue</h1>
@@ -675,7 +675,7 @@ export const ReportIssuePage: React.FC = () => {
       )}
 
       {/* Stepper Navigation Footer */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-line">
+      <div className="sticky bottom-4 z-20 mt-8 py-3.5 px-4 bg-card/95 backdrop-blur-md rounded-xl border border-line shadow-card flex items-center justify-between">
         <Button
           type="button"
           variant="outline"

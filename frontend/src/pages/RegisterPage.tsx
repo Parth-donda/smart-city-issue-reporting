@@ -59,12 +59,9 @@ export const RegisterPage: React.FC = () => {
       {/* Left / Top Hero Gradient Side Panel */}
       <div className="lg:w-5/12 bg-hero-gradient text-card p-8 lg:p-14 flex flex-col justify-between shadow-soft">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-input bg-primary-600 flex items-center justify-center text-card font-bold text-lg shadow-soft">
-              SC
-            </div>
+          <div className="flex items-center">
             <div>
-              <span className="font-heading font-bold text-xl text-card tracking-tight">SmartCivic</span>
+              <span className="font-heading font-bold text-2xl text-card tracking-tight">SmartCivic</span>
               <span className="block text-[11px] font-mono text-primary-100 uppercase tracking-widest">
                 Citizen Registration
               </span>

@@ -49,14 +49,14 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-950/40 transition-opacity duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-ink-950/50 backdrop-blur-xs transition-opacity duration-150 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidths[maxWidth]} bg-card rounded-card border border-line shadow-modal overflow-hidden animate-in fade-in zoom-in-95 duration-150`}
+        className={`w-full ${maxWidths[maxWidth]} max-h-[88vh] flex flex-col bg-card rounded-card border border-line shadow-modal overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between p-5 border-b border-line">
+        <div className="flex items-start justify-between p-4 sm:p-5 border-b border-line shrink-0">
           <div>
             {title && <h3 className="text-lg font-heading font-semibold text-ink-950">{title}</h3>}
             {description && <p className="text-xs text-ink-500 mt-1">{description}</p>}
@@ -70,10 +70,10 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         </div>
 
-        <div className="p-5">{children}</div>
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain min-h-0">{children}</div>
 
         {footer && (
-          <div className="p-4 bg-surface border-t border-line flex items-center justify-end gap-3">
+          <div className="p-4 bg-surface border-t border-line flex items-center justify-end gap-3 shrink-0">
             {footer}
           </div>
         )}

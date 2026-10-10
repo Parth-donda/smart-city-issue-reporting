@@ -231,12 +231,9 @@ export const AppShell: React.FC<AppShellProps> = ({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-card border-r border-line shrink-0">
         {/* Brand / Logo */}
-        <div className="h-16 px-6 border-b border-line flex items-center gap-3">
-          <div className="w-8 h-8 rounded-button bg-primary-700 flex items-center justify-center text-card font-heading font-bold text-lg">
-            S
-          </div>
+        <div className="h-16 px-6 border-b border-line flex items-center">
           <div>
-            <h1 className="font-heading font-bold text-base tracking-tight text-ink-950">
+            <h1 className="font-heading font-bold text-lg tracking-tight text-ink-950">
               SmartCivic
             </h1>
             <p className="text-[11px] text-ink-500 uppercase tracking-wider font-medium">
@@ -315,11 +312,6 @@ export const AppShell: React.FC<AppShellProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-surface border border-line rounded-badge text-xs">
-              <span className="w-2 h-2 rounded-full bg-semantic-success" />
-              <span className="text-ink-700 font-medium">System Online</span>
-            </div>
-
             {/* Notification Bell & Popover */}
             <NotificationPopover />
           </div>

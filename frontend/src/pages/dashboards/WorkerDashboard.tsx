@@ -431,8 +431,8 @@ export const WorkerDashboard: React.FC = () => {
                 )}
               </div>
               {afterPreview && (
-                <div className="mt-2 aspect-video max-h-44 rounded-input overflow-hidden border border-line bg-surface">
-                  <img src={afterPreview} alt="After Preview" className="w-full h-full object-cover" />
+                <div className="mt-2 h-28 sm:h-32 rounded-input overflow-hidden border border-line bg-surface flex items-center justify-center">
+                  <img src={afterPreview} alt="After Preview" className="w-full h-full object-contain bg-black/5" />
                 </div>
               )}
             </div>
@@ -460,8 +460,8 @@ export const WorkerDashboard: React.FC = () => {
                 )}
               </div>
               {beforePreview && (
-                <div className="mt-2 aspect-video max-h-36 rounded-input overflow-hidden border border-line bg-surface">
-                  <img src={beforePreview} alt="Before Preview" className="w-full h-full object-cover" />
+                <div className="mt-2 h-24 sm:h-28 rounded-input overflow-hidden border border-line bg-surface flex items-center justify-center">
+                  <img src={beforePreview} alt="Before Preview" className="w-full h-full object-contain bg-black/5" />
                 </div>
               )}
             </div>
@@ -495,8 +495,8 @@ export const WorkerDashboard: React.FC = () => {
               />
             </div>
 
-            {/* Submit Actions */}
-            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+            {/* Submit Actions - Sticky to ensure it is always accessible and never hidden behind taskbar */}
+            <div className="pt-3 pb-1 border-t border-line flex items-center justify-end gap-2 sticky bottom-0 bg-card/95 backdrop-blur-xs mt-2 z-10">
               <Button
                 variant="ghost"
                 size="sm"

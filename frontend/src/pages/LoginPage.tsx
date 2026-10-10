@@ -168,7 +168,17 @@ export const LoginPage: React.FC = () => {
                         : 'border-line bg-surface hover:bg-white text-ink-700 hover:border-ink-300'
                     }`}
                   >
-                    <span className="text-[10px] leading-tight font-mono uppercase">{role.badge}</span>
+                    <span className="text-xs leading-tight font-medium">
+                      {role.id === 'admin'
+                        ? 'Admin'
+                        : role.id === 'officer'
+                        ? 'Officer'
+                        : role.id === 'supervisor'
+                        ? 'Supervisor'
+                        : role.id === 'worker'
+                        ? 'Worker'
+                        : 'Citizen'}
+                    </span>
                   </button>
                 );
               })}
@@ -178,11 +188,8 @@ export const LoginPage: React.FC = () => {
               <div className="mt-2.5 p-3.5 rounded-xl bg-surface border border-line text-xs space-y-2.5 animate-in fade-in">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-semibold text-ink-950 truncate flex items-center gap-2">
-                      <span>{selectedRole.name}</span>
-                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${selectedRole.badgeColor}`}>
-                        {selectedRole.badge}
-                      </span>
+                    <p className="font-semibold text-ink-950 truncate">
+                      {selectedRole.name}
                     </p>
                     <p className="text-[11px] text-ink-500 truncate mt-0.5">{selectedRole.description}</p>
                   </div>

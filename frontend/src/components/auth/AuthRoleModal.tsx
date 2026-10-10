@@ -207,15 +207,10 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                 className="group p-4 rounded-xl border border-slate-200 hover:border-primary-600/70 bg-slate-50/50 hover:bg-white transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs hover:shadow-sm"
               >
                 <div className="min-w-0 space-y-2 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
+                  <div>
+                    <h4 className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
                       {role.name}
-                    </span>
-                    <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${role.badgeColor}`}
-                    >
-                      {role.badge}
-                    </span>
+                    </h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-snug">
                     {role.description}

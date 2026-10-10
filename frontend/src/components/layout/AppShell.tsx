@@ -13,11 +13,13 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle2,
-  Inbox
+  Inbox,
+  LogOut
 } from 'lucide-react';
 import { UserRole } from '../../types/design-system';
 import { NotificationItem } from '../../types/issues';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export interface NavItem {
   id: string;
@@ -225,6 +227,17 @@ export const AppShell: React.FC<AppShellProps> = ({
   navItems = DEFAULT_NAV,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const displayName = user ? (user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : user.username) : userName;
+  const displayRole = user?.role || userRole;
+  const userInitials = (displayName || 'U').slice(0, 2).toUpperCase();
 
   return (
     <div className="min-h-screen flex bg-surface text-ink-950 font-sans">
@@ -276,20 +289,17 @@ export const AppShell: React.FC<AppShellProps> = ({
           })}
         </nav>
 
-        {/* User Profile Footer */}
-        <div className="p-4 border-t border-line bg-surface/50">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary-700/10 text-primary-700 flex items-center justify-center font-semibold text-xs border border-line">
-              {userName.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-ink-950 truncate">{userName}</p>
-              <div className="flex items-center gap-1 text-[11px] text-ink-500">
-                <Shield className="w-3 h-3 text-primary-600" />
-                <span className="truncate">{userRole}</span>
-              </div>
-            </div>
-          </div>
+        {/* Sidebar Footer with Sign Out Option */}
+        <div className="p-3 border-t border-line bg-surface/30">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50/80 rounded-button transition-colors cursor-pointer"
+            title="Sign Out of Session"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -311,9 +321,40 @@ export const AppShell: React.FC<AppShellProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Top Right Navbar: Notifications, User Profile & Sign Out Option */}
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             {/* Notification Bell & Popover */}
             <NotificationPopover />
+
+            <div className="h-6 w-px bg-line" />
+
+            {/* User Profile Widget & Sign Out */}
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              <div className="flex items-center gap-2 py-1 px-2.5 rounded-lg bg-surface border border-line shadow-2xs">
+                <div className="w-8 h-8 rounded-full bg-primary-700/10 text-primary-700 flex items-center justify-center font-bold text-xs border border-primary-600/20 shrink-0">
+                  {userInitials}
+                </div>
+                <div className="flex flex-col min-w-0 text-left">
+                  <span className="text-xs font-semibold text-ink-950 truncate max-w-[120px] leading-tight">
+                    {displayName}
+                  </span>
+                  <div className="flex items-center gap-1 text-[10px] text-ink-500 font-mono uppercase tracking-wider">
+                    <Shield className="w-3 h-3 text-primary-600 shrink-0" />
+                    <span className="truncate max-w-[100px]">{displayRole}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-button transition-all duration-150 cursor-pointer shadow-2xs"
+                title="Sign out of account"
+              >
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -324,7 +365,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <div
-              className="w-64 h-full bg-card border-r border-line p-4 space-y-2 flex flex-col"
+              className="w-64 h-full bg-card border-r border-line p-4 space-y-3 flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between pb-3 border-b border-line">
@@ -359,6 +400,30 @@ export const AppShell: React.FC<AppShellProps> = ({
                   </button>
                 ))}
               </nav>
+
+              {/* Mobile Drawer Bottom User & Sign Out */}
+              <div className="pt-3 border-t border-line space-y-2">
+                <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-surface border border-line">
+                  <div className="w-8 h-8 rounded-full bg-primary-700/10 text-primary-700 flex items-center justify-center font-bold text-xs border border-primary-600/20 shrink-0">
+                    {userInitials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-ink-950 truncate">{displayName}</p>
+                    <p className="text-[10px] text-ink-500 font-mono uppercase">{displayRole}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-button transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 shrink-0" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

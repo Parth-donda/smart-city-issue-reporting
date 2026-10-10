@@ -12,6 +12,7 @@ import {
 import { Button } from '../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { useAuth } from '../context/AuthContext';
 
 interface TimelineEvent {
   from_status: string;
@@ -73,6 +74,7 @@ const STAGE_ORDER: Record<string, number> = {
 export const TrackIssuePage: React.FC = () => {
   const { issueId: paramIssueId } = useParams<{ issueId?: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState(paramIssueId || '');
   const [issueData, setIssueData] = useState<IssueTrackData | null>(null);
@@ -399,7 +401,7 @@ export const TrackIssuePage: React.FC = () => {
               {/* Need to Report Another Issue */}
               <div className="p-4 bg-primary-100/40 border border-primary-600/30 rounded-lg text-center">
                 <p className="text-xs font-semibold text-primary-700 mb-2">Have another municipal concern?</p>
-                <Link to="/report">
+                <Link to={isAuthenticated ? '/report' : '/login?redirect=/report'}>
                   <Button variant="primary" size="sm" className="w-full">
                     Report New Issue
                   </Button>

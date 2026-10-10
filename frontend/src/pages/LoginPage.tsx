@@ -73,7 +73,12 @@ export const LoginPage: React.FC = () => {
 
     try {
       const user = await login(uname, pwd);
-      const redirectUrl = location.state?.from?.pathname || getDashboardRoute(user.role) || fallbackRoute || '/';
+      const redirectUrl =
+        searchParams.get('redirect') ||
+        location.state?.from?.pathname ||
+        getDashboardRoute(user.role) ||
+        fallbackRoute ||
+        '/';
       navigate(redirectUrl, { replace: true });
     } catch (err: any) {
       if (err.detail) {

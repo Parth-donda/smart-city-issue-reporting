@@ -69,7 +69,13 @@ const STEPS: Step[] = [
 
 export const ReportIssuePage: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || !token)) {
+      navigate('/login?redirect=/report');
+    }
+  }, [isLoading, isAuthenticated, token, navigate]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);

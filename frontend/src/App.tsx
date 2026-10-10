@@ -46,7 +46,7 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const handleNav = (id: string) => {
     if (id === 'home') navigate('/');
-    else if (id === 'report') navigate('/report');
+    else if (id === 'report') navigate(user ? '/report' : '/login?redirect=/report');
     else if (id === 'track') navigate('/track');
     else if (id === 'citizen-dashboard') navigate('/citizen');
     else if (id === 'officer-dashboard') navigate('/officer');
@@ -103,13 +103,15 @@ export function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Public / Citizen Issue Reporting & Tracking */}
+            {/* Citizen Issue Reporting: Requires Authentication */}
             <Route
               path="/report"
               element={
-                <ShellWrapper>
-                  <ReportIssuePage />
-                </ShellWrapper>
+                <ProtectedRoute>
+                  <ShellWrapper>
+                    <ReportIssuePage />
+                  </ShellWrapper>
+                </ProtectedRoute>
               }
             />
 

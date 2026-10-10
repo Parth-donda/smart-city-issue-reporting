@@ -28,6 +28,7 @@ export const HomePage: React.FC = () => {
   const [authRoleModalOpen, setAuthRoleModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, getDashboardRoute } = useAuth();
+  const reportLink = isAuthenticated ? '/report' : '/login?redirect=/report';
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -258,7 +259,7 @@ export const HomePage: React.FC = () => {
                 <Search className="w-4 h-4 text-primary-700" /> Track a Report
               </Link>
               <Link
-                to="/report"
+                to={reportLink}
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-3 py-2 rounded-lg bg-teal-50 text-primary-700 font-semibold flex items-center gap-2"
               >
@@ -352,7 +353,7 @@ export const HomePage: React.FC = () => {
 
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Link to="/report">
+              <Link to={reportLink}>
                 <Button
                   variant="primary"
                   size="lg"
@@ -475,7 +476,7 @@ export const HomePage: React.FC = () => {
                   <div className="text-[11px] font-semibold text-slate-900">Central Municipal Control Room</div>
                   <div className="text-xs text-slate-600">Helpline: <strong className="text-primary-700">1800-11-2026</strong> (Toll-Free, 24×7)</div>
                 </div>
-                <Link to="/report" className="shrink-0">
+                <Link to={reportLink} className="shrink-0">
                   <Button variant="primary" size="sm" className="bg-primary-700 hover:bg-primary-800 text-white text-xs px-3.5 py-1.5 shadow-xs">
                     File Complaint
                   </Button>
@@ -630,7 +631,7 @@ export const HomePage: React.FC = () => {
               </p>
             </div>
 
-            <Link to="/report">
+            <Link to={reportLink}>
               <Button variant="outline" size="sm" className="font-medium whitespace-nowrap text-slate-700 border-slate-300">
                 <FilePlus2 className="w-4 h-4 mr-1.5" /> Submit a New Issue
               </Button>
@@ -696,7 +697,7 @@ export const HomePage: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap justify-center items-center gap-3.5 pt-2">
-                <Link to="/report">
+                <Link to={reportLink}>
                   <Button
                     variant="primary"
                     size="lg"
@@ -749,7 +750,7 @@ export const HomePage: React.FC = () => {
           <div className="space-y-2">
             <h4 className="text-xs font-semibold uppercase text-slate-300 tracking-wider">Quick Navigation</h4>
             <ul className="space-y-1.5 text-xs text-slate-400">
-              <li><Link to="/report" className="hover:text-white transition-colors">Report an Issue</Link></li>
+              <li><Link to={reportLink} className="hover:text-white transition-colors">Report an Issue</Link></li>
               <li><Link to="/track" className="hover:text-white transition-colors">Track Status</Link></li>
               <li><Link to="/register" className="hover:text-white transition-colors">Create Citizen Account</Link></li>
               <li><button type="button" onClick={() => setAuthRoleModalOpen(true)} className="hover:text-white transition-colors cursor-pointer text-left">Staff & Citizen Login</button></li>

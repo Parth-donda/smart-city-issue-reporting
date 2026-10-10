@@ -21,10 +21,12 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { AuthRoleModal } from '../components/auth/AuthRoleModal';
 
 export const HomePage: React.FC = () => {
   const [trackId, setTrackId] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authRoleModalOpen, setAuthRoleModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, getDashboardRoute } = useAuth();
 
@@ -186,15 +188,15 @@ export const HomePage: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2.5">
-                <Link to="/login">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="font-semibold text-slate-700 hover:text-primary-700 hover:border-primary-600 bg-white hover:bg-slate-50 shadow-xs py-2 px-3.5 text-xs"
-                  >
-                    <LogIn className="w-3.5 h-3.5 mr-1.5 text-slate-400" /> Sign In
-                  </Button>
-                </Link>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAuthRoleModalOpen(true)}
+                  className="font-semibold text-slate-700 hover:text-primary-700 hover:border-primary-600 bg-white hover:bg-slate-50 shadow-xs py-2 px-3.5 text-xs cursor-pointer"
+                >
+                  <LogIn className="w-3.5 h-3.5 mr-1.5 text-slate-400" /> Sign In
+                </Button>
                 <Link to="/register">
                   <Button
                     variant="primary"
@@ -277,11 +279,18 @@ export const HomePage: React.FC = () => {
                 </Link>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="md" className="w-full">
-                      <LogIn className="w-4 h-4 mr-1.5" /> Sign In
-                    </Button>
-                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    className="w-full cursor-pointer"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setAuthRoleModalOpen(true);
+                    }}
+                  >
+                    <LogIn className="w-4 h-4 mr-1.5" /> Sign In
+                  </Button>
                   <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="primary" size="md" className="w-full bg-primary-700 text-white">
                       <UserPlus className="w-4 h-4 mr-1.5" /> Sign Up
@@ -745,7 +754,7 @@ export const HomePage: React.FC = () => {
               <li><Link to="/report" className="hover:text-white transition-colors">Report an Issue</Link></li>
               <li><Link to="/track" className="hover:text-white transition-colors">Track Status</Link></li>
               <li><Link to="/register" className="hover:text-white transition-colors">Create Citizen Account</Link></li>
-              <li><Link to="/login" className="hover:text-white transition-colors">Staff & Citizen Login</Link></li>
+              <li><button type="button" onClick={() => setAuthRoleModalOpen(true)} className="hover:text-white transition-colors cursor-pointer text-left">Staff & Citizen Login</button></li>
             </ul>
           </div>
 
@@ -764,6 +773,12 @@ export const HomePage: React.FC = () => {
           <p className="text-slate-500">Transparent & Accountable Municipal Service</p>
         </div>
       </footer>
+
+      {/* Role-Based Authentication Modal */}
+      <AuthRoleModal
+        isOpen={authRoleModalOpen}
+        onClose={() => setAuthRoleModalOpen(false)}
+      />
     </div>
   );
 };

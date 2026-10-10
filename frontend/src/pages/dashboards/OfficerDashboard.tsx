@@ -305,7 +305,7 @@ export const OfficerDashboard: React.FC = () => {
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <Card
           onClick={() => setActiveTab('SUBMITTED')}
           className={`cursor-pointer transition-all border-l-4 border-l-status-submitted ${
@@ -355,6 +355,20 @@ export const OfficerDashboard: React.FC = () => {
         </Card>
 
         <Card
+          onClick={() => setActiveTab('IN_PROGRESS')}
+          className={`cursor-pointer transition-all border-l-4 border-l-status-in-progress ${
+            activeTab === 'IN_PROGRESS' ? 'ring-2 ring-primary-600 bg-primary-100/10' : 'hover:border-line'
+          }`}
+        >
+          <CardContent className="p-3.5">
+            <span className="text-[10px] text-ink-500 font-mono uppercase tracking-wider font-semibold">In Field</span>
+            <div className="text-xl font-bold font-heading text-ink-950 mt-0.5">
+              {(summary?.on_the_way || 0) + (summary?.arrived || 0) + (summary?.work_started || 0) + (summary?.in_progress || 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
           onClick={() => setActiveTab('SLA_BREACHED')}
           className={`cursor-pointer transition-all border-l-4 border-l-semantic-danger ${
             activeTab === 'SLA_BREACHED' ? 'ring-2 ring-semantic-danger bg-semantic-danger/5' : 'hover:border-line'
@@ -392,7 +406,7 @@ export const OfficerDashboard: React.FC = () => {
               { id: 'UNDER_REVIEW', label: `Under Review (${summary?.under_review || 0})` },
               { id: 'ACCEPTED', label: `Accepted (${summary?.accepted || 0})` },
               { id: 'ASSIGNED', label: `Assigned (${summary?.assigned || 0})` },
-              { id: 'IN_PROGRESS', label: `In Field (${(summary?.on_the_way || 0) + (summary?.work_started || 0) + (summary?.in_progress || 0)})` },
+              { id: 'IN_PROGRESS', label: `In Field (${(summary?.on_the_way || 0) + (summary?.arrived || 0) + (summary?.work_started || 0) + (summary?.in_progress || 0)})` },
               { id: 'SLA_BREACHED', label: `SLA Breached (${summary?.sla_breached || 0})` },
               { id: 'REJECTED', label: `Rejected (${summary?.rejected || 0})` },
               { id: 'REOPENED', label: `Reopened (${summary?.reopened || 0})` },

@@ -160,7 +160,7 @@ class IssueListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(status=IssueStatus.ASSIGNED)
         elif tab_param == 'in_progress':
             queryset = queryset.filter(status__in=[
-                IssueStatus.ASSIGNED, IssueStatus.ON_THE_WAY, IssueStatus.ARRIVED,
+                IssueStatus.ON_THE_WAY, IssueStatus.ARRIVED,
                 IssueStatus.WORK_STARTED, IssueStatus.IN_PROGRESS
             ])
         elif tab_param == 'resolved':

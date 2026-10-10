@@ -65,6 +65,8 @@ export const AUTH_ROLES: RoleAuthOption[] = [
       { username: 'officer_elec', name: 'Suresh Rane', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'officer_water', name: 'Mahesh Jadhav', department: 'Water Supply & Sewerage', password: 'pass123' },
       { username: 'officer_san', name: 'Anita Gupta', department: 'Solid Waste & Sanitation', password: 'pass123' },
+      { username: 'officer_parks', name: 'Meera Joshi', department: 'Parks & Public Spaces', password: 'pass123' },
+      { username: 'officer_other', name: 'Neha Trivedi', department: 'Other Civic Matters', password: 'pass123' },
     ],
   },
   {
@@ -83,6 +85,8 @@ export const AUTH_ROLES: RoleAuthOption[] = [
       { username: 'sup_elec', name: 'Kishore Verma', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'sup_water', name: 'Dinesh Kulkarni', department: 'Water Supply & Sewerage', password: 'pass123' },
       { username: 'sup_san', name: 'Manish Rawat', department: 'Solid Waste & Sanitation', password: 'pass123' },
+      { username: 'sup_parks', name: 'Sanjay Mehta', department: 'Parks & Public Spaces', password: 'pass123' },
+      { username: 'sup_other', name: 'Harish Chauhan', department: 'Other Civic Matters', password: 'pass123' },
     ],
   },
   {
@@ -102,6 +106,8 @@ export const AUTH_ROLES: RoleAuthOption[] = [
       { username: 'worker_elec', name: 'Ramesh Nair', department: 'Electrical & Street Lighting', password: 'pass123' },
       { username: 'worker_water', name: 'Ganesh Pawar', department: 'Water Supply & Sewerage', password: 'pass123' },
       { username: 'worker_san', name: 'Bablu Yadav', department: 'Solid Waste & Sanitation', password: 'pass123' },
+      { username: 'worker_parks', name: 'Devendra Rathod', department: 'Parks & Public Spaces', password: 'pass123' },
+      { username: 'worker_other', name: 'Kishan Solanki', department: 'Other Civic Matters', password: 'pass123' },
     ],
   },
   {

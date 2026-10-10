@@ -22,4 +22,4 @@ class AuditLogListView(generics.ListAPIView):
         issue_id = self.request.query_params.get('issue_id')
         if issue_id:
             qs = qs.filter(issue__issue_id=issue_id)
-        return qs[:100]
+        return qs

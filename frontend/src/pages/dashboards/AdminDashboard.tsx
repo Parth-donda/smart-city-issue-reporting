@@ -136,7 +136,7 @@ export const AdminDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [overviewData, catData, deptData, slaData, auditData] = await Promise.all([
+      const [overviewRes, catRes, deptRes, slaRes, auditRes] = await Promise.allSettled([
         api.getAdminOverview(),
         api.getCategories(),
         api.getDepartments(),
@@ -144,11 +144,11 @@ export const AdminDashboard: React.FC = () => {
         api.getAuditLogs(),
       ]);
 
-      setOverview(overviewData);
-      setCategories(catData);
-      setDepartments(deptData);
-      setSlaConfigs(slaData);
-      setAuditLogs(auditData);
+      if (overviewRes.status === 'fulfilled') setOverview(overviewRes.value);
+      if (catRes.status === 'fulfilled') setCategories(catRes.value);
+      if (deptRes.status === 'fulfilled') setDepartments(deptRes.value);
+      if (slaRes.status === 'fulfilled') setSlaConfigs(slaRes.value);
+      if (auditRes.status === 'fulfilled') setAuditLogs(auditRes.value);
     } catch (err) {
       console.error('Failed to load admin overview data:', err);
     } finally {
@@ -164,6 +164,8 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'ISSUES') {
       fetchAdminIssues();
+    } else if (activeTab === 'ANALYTICS' && !overview) {
+      loadDashboardData();
     }
   }, [activeTab, issueDeptFilter, issueStatusFilter, issuePriorityFilter]);
 
@@ -577,7 +579,7 @@ export const AdminDashboard: React.FC = () => {
                 <CardDescription>Total reported vs. successfully resolved tickets by municipal department</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 w-full">
+                <div className="h-64 w-full min-h-[256px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={departmentChartData} margin={{ top: 10, right: 20, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8EF" />
@@ -611,34 +613,41 @@ export const AdminDashboard: React.FC = () => {
                 <CardDescription>Current proportion of civic tickets across lifecycle stages</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={statusPieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {statusPieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.statusKey] || '#52667A'} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#0A1A2A',
-                          color: '#FFFFFF',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          border: 'none',
-                        }}
-                      />
-                      <Legend wrapperStyle={{ fontSize: '11px' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="h-64 w-full min-h-[256px]">
+                  {statusPieData.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-xs text-ink-400 gap-2">
+                      <Inbox className="w-8 h-8 text-ink-300" />
+                      <span>No active lifecycle state records logged yet</span>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusPieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={80}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {statusPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.statusKey] || '#52667A'} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#0A1A2A',
+                            color: '#FFFFFF',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            border: 'none',
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: '11px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </CardContent>
             </Card>

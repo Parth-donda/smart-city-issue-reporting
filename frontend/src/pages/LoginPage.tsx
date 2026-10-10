@@ -21,20 +21,43 @@ export const LoginPage: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const roleParam = searchParams.get('role');
+    const usernameParam = searchParams.get('username');
+
     if (roleParam) {
       const match = AUTH_ROLES.find((r) => r.id === roleParam.toLowerCase());
       if (match) {
         setSelectedRole(match);
-        setUsername(match.username);
-        setPassword(match.password);
+        if (usernameParam) {
+          const personMatch = match.persons.find((p) => p.username.toLowerCase() === usernameParam.toLowerCase());
+          if (personMatch) {
+            setUsername(personMatch.username);
+            setPassword(personMatch.password);
+            return;
+          }
+        }
+        const defaultPerson = match.persons[0] || { username: match.username, password: match.password };
+        setUsername(defaultPerson.username);
+        setPassword(defaultPerson.password);
+      }
+    } else if (usernameParam) {
+      for (const role of AUTH_ROLES) {
+        const personMatch = role.persons.find((p) => p.username.toLowerCase() === usernameParam.toLowerCase());
+        if (personMatch) {
+          setSelectedRole(role);
+          setUsername(personMatch.username);
+          setPassword(personMatch.password);
+          break;
+        }
       }
     }
-  }, [roleParam]);
+  }, [searchParams]);
 
   const handleSelectRole = (role: RoleAuthOption) => {
     setSelectedRole(role);
-    setUsername(role.username);
-    setPassword(role.password);
+    const defaultPerson = role.persons[0] || { username: role.username, password: role.password };
+    setUsername(defaultPerson.username);
+    setPassword(defaultPerson.password);
     setError(null);
   };
 
@@ -152,25 +175,60 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {selectedRole && (
-              <div className="mt-2 p-2.5 rounded-lg bg-surface border border-line text-xs flex items-center justify-between gap-2 animate-in fade-in">
-                <div className="min-w-0">
-                  <p className="font-semibold text-ink-950 truncate flex items-center gap-1.5">
-                    <span>{selectedRole.name}</span>
-                    <span className="text-ink-400 font-mono text-[10px]">({selectedRole.username})</span>
-                  </p>
-                  <p className="text-[11px] text-ink-500 truncate mt-0.5">{selectedRole.description}</p>
+              <div className="mt-2.5 p-3 rounded-xl bg-surface border border-line text-xs space-y-2.5 animate-in fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-ink-950 truncate flex items-center gap-2">
+                      <span>{selectedRole.name}</span>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${selectedRole.badgeColor}`}>
+                        {selectedRole.badge}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-ink-500 truncate mt-0.5">{selectedRole.description}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    isLoading={isSubmitting}
+                    onClick={() => executeLogin(username, password, selectedRole.dashboardRoute)}
+                    className="bg-primary-700 text-white shrink-0 text-xs py-1.5 px-3 self-end sm:self-auto cursor-pointer"
+                    rightIcon={<ArrowRight className="w-3 h-3" />}
+                  >
+                    Quick Sign In
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  isLoading={isSubmitting}
-                  onClick={() => executeLogin(selectedRole.username, selectedRole.password, selectedRole.dashboardRoute)}
-                  className="bg-primary-700 text-white shrink-0 text-xs py-1.5"
-                  rightIcon={<ArrowRight className="w-3 h-3" />}
-                >
-                  Quick Sign In
-                </Button>
+
+                {selectedRole.persons && selectedRole.persons.length > 1 && (
+                  <div className="pt-2 border-t border-line/60 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span className="text-[11px] font-medium text-ink-600 shrink-0">
+                      Select Person / Department:
+                    </span>
+                    <select
+                      value={username}
+                      onChange={(e) => {
+                        const person = selectedRole.persons.find((p) => p.username === e.target.value);
+                        if (person) {
+                          setUsername(person.username);
+                          setPassword(person.password);
+                        }
+                      }}
+                      className="text-xs bg-white border border-line rounded-lg px-2.5 py-1 text-ink-900 font-medium focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden cursor-pointer w-full sm:w-auto"
+                    >
+                      {selectedRole.persons.map((person) => (
+                        <option key={person.username} value={person.username}>
+                          {person.name} — {person.department} ({person.username})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-ink-500 pt-0.5">
+                  <span>Autofilled Login: <strong className="text-ink-800">{username}</strong></span>
+                  <span className="text-ink-300">•</span>
+                  <span>Pass: <strong className="text-ink-800">{password}</strong></span>
+                </div>
               </div>
             )}
           </div>

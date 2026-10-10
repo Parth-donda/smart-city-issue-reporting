@@ -14,6 +14,13 @@ export interface AuthRoleModalProps {
   onClose: () => void;
 }
 
+export interface PersonOption {
+  username: string;
+  name: string;
+  department: string;
+  password: string;
+}
+
 export interface RoleAuthOption {
   id: string;
   name: string;
@@ -24,6 +31,7 @@ export interface RoleAuthOption {
   roleType: string;
   dashboardRoute: string;
   description: string;
+  persons: PersonOption[];
 }
 
 export const AUTH_ROLES: RoleAuthOption[] = [
@@ -37,6 +45,9 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'MUNICIPAL_ADMIN',
     dashboardRoute: '/admin',
     description: 'City-wide oversight, department SLAs, system parameters & analytics.',
+    persons: [
+      { username: 'admin', name: 'Kavita Rao', department: 'Municipal Administration', password: 'pass123' },
+    ],
   },
   {
     id: 'officer',
@@ -48,6 +59,12 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'DEPARTMENT_OFFICER',
     dashboardRoute: '/officer',
     description: 'Triage grievances, verify evidence & allocate tasks to field teams.',
+    persons: [
+      { username: 'officer', name: 'Vikram Deshmukh', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'officer_elec', name: 'Suresh Rane', department: 'Electrical & Street Lighting', password: 'pass123' },
+      { username: 'officer_water', name: 'Mahesh Jadhav', department: 'Water Supply & Sewerage', password: 'pass123' },
+      { username: 'officer_san', name: 'Anita Gupta', department: 'Solid Waste & Sanitation', password: 'pass123' },
+    ],
   },
   {
     id: 'supervisor',
@@ -59,6 +76,11 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'SUPERVISOR',
     dashboardRoute: '/supervisor',
     description: 'SLA monitoring, escalation approval, and quality verification audits.',
+    persons: [
+      { username: 'supervisor', name: 'Anjali Patil', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'sup_elec', name: 'Kishore Verma', department: 'Electrical & Street Lighting', password: 'pass123' },
+      { username: 'sup_water', name: 'Dinesh Kulkarni', department: 'Water Supply & Sewerage', password: 'pass123' },
+    ],
   },
   {
     id: 'worker',
@@ -70,6 +92,13 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'WORKER',
     dashboardRoute: '/worker',
     description: 'On-site execution, work order checklists & before/after resolution photos.',
+    persons: [
+      { username: 'worker', name: 'Rajesh Kumar', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'worker2', name: 'Sunil Shinde', department: 'Roads & Infrastructure', password: 'pass123' },
+      { username: 'worker_elec', name: 'Ramesh Nair', department: 'Electrical & Street Lighting', password: 'pass123' },
+      { username: 'worker_water', name: 'Ganesh Pawar', department: 'Water Supply & Sewerage', password: 'pass123' },
+      { username: 'worker_san', name: 'Bablu Yadav', department: 'Solid Waste & Sanitation', password: 'pass123' },
+    ],
   },
   {
     id: 'citizen',
@@ -81,6 +110,12 @@ export const AUTH_ROLES: RoleAuthOption[] = [
     roleType: 'CITIZEN',
     dashboardRoute: '/citizen',
     description: 'Report civic issues, attach geotagged evidence & confirm ticket closures.',
+    persons: [
+      { username: 'Parth_Donda', name: 'Parth Donda', department: 'Registered Citizen', password: 'Parth123' },
+      { username: 'citizen', name: 'Aarav Sharma', department: 'Verified Citizen', password: 'pass123' },
+      { username: 'citizen2', name: 'Pooja Patel', department: 'Verified Citizen', password: 'pass123' },
+      { username: 'citizen3', name: 'Rohan Mehta', department: 'Verified Citizen', password: 'pass123' },
+    ],
   },
 ];
 
@@ -89,28 +124,29 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
   const navigate = useNavigate();
   const [loadingRoleId, setLoadingRoleId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedPersons, setSelectedPersons] = useState<Record<string, PersonOption>>({});
 
   if (!isOpen) return null;
 
-  const handleQuickLogin = async (role: RoleAuthOption) => {
+  const handleQuickLogin = async (role: RoleAuthOption, person: PersonOption) => {
     setLoadingRoleId(role.id);
     setErrorMsg(null);
     try {
-      const user = await login(role.username, role.password);
+      const user = await login(person.username, person.password);
       onClose();
       const targetRoute = getDashboardRoute(user.role) || role.dashboardRoute;
       navigate(targetRoute, { replace: true });
     } catch (err: any) {
       setErrorMsg(
-        err.detail || err.non_field_errors?.[0] || `Unable to log in as ${role.name}. Please try again.`
+        err.detail || err.non_field_errors?.[0] || `Unable to log in as ${person.name}. Please try again.`
       );
       setLoadingRoleId(null);
     }
   };
 
-  const handleNavigateToLoginWithRole = (roleId: string) => {
+  const handleNavigateToLoginWithRole = (roleId: string, username?: string) => {
     onClose();
-    navigate(`/login?role=${roleId}`);
+    navigate(`/login?role=${roleId}${username ? `&username=${username}` : ''}`);
   };
 
   return (
@@ -159,40 +195,81 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
         <div className="p-5 sm:p-6 max-h-[62vh] overflow-y-auto space-y-2.5">
           {AUTH_ROLES.map((role) => {
             const isLoading = loadingRoleId === role.id;
+            const activePerson =
+              selectedPersons[role.id] ||
+              role.persons[0] || {
+                username: role.username,
+                password: role.password,
+                name: role.name,
+                department: '',
+              };
+
             return (
               <div
                 key={role.id}
                 className="group p-3.5 sm:p-4 rounded-xl border border-slate-200 hover:border-primary-600/70 bg-slate-50/50 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:shadow-sm"
               >
-                <div className="min-w-0 space-y-1">
+                <div className="min-w-0 space-y-1.5 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-sm text-slate-900 group-hover:text-primary-700 transition-colors">
                       {role.name}
                     </span>
-                      <span
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${role.badgeColor}`}
-                      >
-                        {role.badge}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 leading-snug">
-                      {role.description}
-                    </p>
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <span className="font-mono text-[11px] text-slate-500">
-                        Login: <strong className="text-slate-700">{role.username}</strong>
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="font-mono text-[11px] text-slate-500">
-                        Pass: <strong className="text-slate-700">{role.password}</strong>
-                      </span>
-                    </div>
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${role.badgeColor}`}
+                    >
+                      {role.badge}
+                    </span>
                   </div>
+                  <p className="text-xs text-slate-600 leading-snug">
+                    {role.description}
+                  </p>
+
+                  {/* Person / Department Selector */}
+                  {role.persons.length > 1 && (
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider shrink-0">
+                        Person:
+                      </span>
+                      <select
+                        value={activePerson.username}
+                        onChange={(e) => {
+                          const found = role.persons.find((p) => p.username === e.target.value);
+                          if (found) {
+                            setSelectedPersons((prev) => ({ ...prev, [role.id]: found }));
+                          }
+                        }}
+                        className="text-xs bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-900 font-medium hover:border-primary-500 focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-hidden transition-colors cursor-pointer max-w-full sm:max-w-xs"
+                      >
+                        {role.persons.map((person) => (
+                          <option key={person.username} value={person.username}>
+                            {person.name} — {person.department} ({person.username})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                    <span className="font-mono text-[11px] text-slate-500">
+                      Login: <strong className="text-slate-800">{activePerson.username}</strong>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-[11px] text-slate-500">
+                      Pass: <strong className="text-slate-800">{activePerson.password}</strong>
+                    </span>
+                    {activePerson.department && activePerson.department !== 'Registered Citizen' && activePerson.department !== 'Verified Citizen' && (
+                      <>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-[11px] text-slate-600 font-medium">{activePerson.department}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pt-2 sm:pt-0">
                   <button
                     type="button"
-                    onClick={() => handleNavigateToLoginWithRole(role.id)}
+                    onClick={() => handleNavigateToLoginWithRole(role.id, activePerson.username)}
                     className="text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
                     title="Customize credentials on login page"
                   >
@@ -204,7 +281,7 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
                     size="sm"
                     disabled={!!loadingRoleId}
                     isLoading={isLoading}
-                    onClick={() => handleQuickLogin(role)}
+                    onClick={() => handleQuickLogin(role, activePerson)}
                     className="bg-primary-700 hover:bg-primary-800 text-white font-semibold text-xs shadow-xs"
                     rightIcon={!isLoading ? <ArrowRight className="w-3.5 h-3.5" /> : undefined}
                   >

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Navigation, Compass, AlertCircle } from 'lucide-react';
+import { MapPin, Navigation, Compass, AlertCircle, Search, CheckCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 // Fix for default Leaflet icon paths in React bundle
@@ -78,7 +78,12 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 }) => {
   const [isDetecting, setIsDetecting] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [geoNotice, setGeoNotice] = useState<string | null>(null);
+  const [permissionBlocked, setPermissionBlocked] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const currentCoords: [number, number] = useMemo(() => {
     if (value.latitude && value.longitude) {
@@ -126,36 +131,121 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     reverseGeocode(cleanLat, cleanLng);
   };
 
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      setGeoError('Geolocation is not supported by your browser.');
-      return;
+  // Fallback: estimate location via Network IP if device GPS is blocked
+  const fetchLocationByIp = async (): Promise<boolean> => {
+    try {
+      const response = await fetch('https://ipwho.is/');
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success && data.latitude && data.longitude) {
+          const lat = Number(data.latitude);
+          const lng = Number(data.longitude);
+          handleCoordsChange(lat, lng);
+          const place = [data.city, data.region].filter(Boolean).join(', ');
+          setGeoNotice(
+            `Located near ${place} via network connection. You can drag the pin on the map to pinpoint the exact street.`
+          );
+          setGeoError(null);
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('IP fallback failed', err);
     }
+    return false;
+  };
 
+  // Auto-detect on mount if no coordinates exist yet
+  useEffect(() => {
+    if (!value.latitude || value.latitude === 0) {
+      fetchLocationByIp();
+    }
+  }, []);
+
+  const handleDetectLocation = async () => {
     setIsDetecting(true);
     setGeoError(null);
+    setGeoNotice(null);
+
+    if (!navigator.geolocation) {
+      const fallbackSuccess = await fetchLocationByIp();
+      setIsDetecting(false);
+      if (!fallbackSuccess) {
+        setGeoError('Geolocation is not supported by your browser. Please search or select your location on the map.');
+      }
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setIsDetecting(false);
+        setPermissionBlocked(false);
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         handleCoordsChange(lat, lng);
+        setGeoNotice('High-accuracy GPS location detected.');
       },
-      (error) => {
-        setIsDetecting(false);
-        let msg = 'Failed to retrieve location.';
+      async (error) => {
         if (error.code === error.PERMISSION_DENIED) {
-          msg = 'Location permission was denied. Please select location manually on the map.';
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = 'Location information is unavailable.';
-        } else if (error.code === error.TIMEOUT) {
-          msg = 'Location request timed out.';
+          setPermissionBlocked(true);
         }
-        setGeoError(msg);
+
+        // Auto fallback to IP geolocation so the user is never stuck
+        const fallbackSuccess = await fetchLocationByIp();
+        setIsDetecting(false);
+
+        if (!fallbackSuccess) {
+          let msg = 'Failed to retrieve location.';
+          if (error.code === error.PERMISSION_DENIED) {
+            msg = 'Location permission was denied in your browser settings. Please enable location or select manually on the map.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            msg = 'Location information is unavailable. Please select your location manually.';
+          } else if (error.code === error.TIMEOUT) {
+            msg = 'Location request timed out. Please try again or select manually.';
+          }
+          setGeoError(msg);
+        }
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     );
+  };
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    setGeoError(null);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery.trim()
+        )}&limit=5&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      if (res.ok) {
+        const results = await res.json();
+        setSearchResults(results);
+        if (results.length === 0) {
+          setGeoError(`No results found for "${searchQuery}". Try adding city or landmark name.`);
+        } else if (results.length === 1) {
+          handleSelectSearchResult(results[0]);
+        }
+      }
+    } catch {
+      setGeoError('Search service temporarily unavailable. You can click directly on the map.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectSearchResult = (item: any) => {
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lon);
+    handleCoordsChange(lat, lng);
+    setSearchResults([]);
+    setSearchQuery('');
+    setGeoNotice(`Map centered on: ${item.display_name.split(',')[0]}`);
   };
 
   const markerRef = useRef<L.Marker | null>(null);
@@ -197,6 +287,80 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           Detect My Location
         </Button>
       </div>
+
+      {/* Area & Landmark Search Bar */}
+      <div className="relative">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-ink-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search area, neighborhood, or landmark (e.g. Navrangpura, MG Road)..."
+              className="w-full pl-9 pr-3 py-2 text-xs border border-line rounded-input bg-surface focus:ring-1 focus:ring-primary-600 focus:outline-none"
+            />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            variant="secondary"
+            isLoading={isSearching}
+          >
+            Search Area
+          </Button>
+        </form>
+
+        {/* Search Results Dropdown */}
+        {searchResults.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-line rounded-lg shadow-lg z-[500] max-h-52 overflow-y-auto">
+            {searchResults.map((result, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSelectSearchResult(result)}
+                className="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 border-b border-line last:border-0 flex items-start gap-2 text-ink-950 transition-colors"
+              >
+                <MapPin className="w-3.5 h-3.5 text-primary-600 shrink-0 mt-0.5" />
+                <span className="truncate">{result.display_name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Geolocation Notice Banner */}
+      {geoNotice && (
+        <div className="p-3 bg-primary-50 border border-primary-200 rounded-lg text-xs text-primary-900 flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2">
+            <CheckCircle className="w-4 h-4 text-primary-600 flex-shrink-0 mt-0.5" />
+            <span>{geoNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setGeoNotice(null)}
+            className="text-primary-700 hover:text-primary-950 text-xs font-semibold px-1"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Browser Permission Blocked Helper Banner */}
+      {permissionBlocked && (
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 space-y-1.5">
+          <div className="flex items-center gap-1.5 font-semibold text-amber-950">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Browser GPS Permission Denied</span>
+          </div>
+          <p className="text-[11px] text-amber-800">
+            Your browser blocked device GPS, so we placed the pin using your approximate network location. To enable high-accuracy satellite GPS:
+          </p>
+          <div className="text-[11px] text-amber-950 bg-amber-100/70 p-2 rounded border border-amber-200">
+            Click the lock/tune icon <strong>🔒</strong> in your browser address bar next to <strong>localhost</strong> ➔ Set <strong>Location</strong> to <strong>Allow</strong> ➔ Click "Detect My Location" again.
+          </div>
+        </div>
+      )}
 
       {geoError && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-status-rejected flex items-start gap-2">

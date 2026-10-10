@@ -158,11 +158,6 @@ export const AuthRoleModal: React.FC<AuthRoleModalProps> = ({ isOpen, onClose })
         {/* Modal Header */}
         <div className="flex items-start justify-between p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-primary-600/60 border border-primary-500/40 text-primary-100 font-semibold">
-                SmartCivic Portal Access
-              </span>
-            </div>
             <h3 className="text-xl sm:text-2xl font-heading font-bold text-white tracking-tight">
               Select Your Authentication Role
             </h3>

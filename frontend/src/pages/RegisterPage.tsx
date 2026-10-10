@@ -69,9 +69,6 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div className="mt-12 lg:mt-24 space-y-4">
-            <span className="font-mono text-xs px-2.5 py-1 bg-primary-700/80 text-primary-100 rounded-badge inline-block border border-primary-600">
-              CITIZEN ACCOUNT
-            </span>
             <h1 className="text-3xl lg:text-4xl font-heading font-bold text-card leading-tight">
               Direct Access to Municipal Services.
             </h1>

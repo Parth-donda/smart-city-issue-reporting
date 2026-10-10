@@ -23,8 +23,8 @@ class LifecycleService:
 
     # Global allowed forward/backward transition graph
     ALLOWED_TRANSITIONS = {
-        IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED],
-        IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.SUBMITTED],
+        IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.ASSIGNED],
+        IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.SUBMITTED, IssueStatus.ASSIGNED],
         IssueStatus.ACCEPTED: [IssueStatus.ASSIGNED, IssueStatus.UNDER_REVIEW, IssueStatus.REJECTED],
         IssueStatus.REJECTED: [IssueStatus.UNDER_REVIEW, IssueStatus.SUBMITTED], # Can be reopened or re-routed
         IssueStatus.ASSIGNED: [IssueStatus.ON_THE_WAY, IssueStatus.ASSIGNED, IssueStatus.ACCEPTED, IssueStatus.WORK_STARTED],
@@ -32,7 +32,7 @@ class LifecycleService:
         IssueStatus.ARRIVED: [IssueStatus.WORK_STARTED, IssueStatus.IN_PROGRESS],
         IssueStatus.WORK_STARTED: [IssueStatus.IN_PROGRESS, IssueStatus.DONE],
         IssueStatus.IN_PROGRESS: [IssueStatus.DONE, IssueStatus.WORK_STARTED],
-        IssueStatus.DONE: [IssueStatus.VERIFIED, IssueStatus.IN_PROGRESS, IssueStatus.REOPENED],
+        IssueStatus.DONE: [IssueStatus.VERIFIED, IssueStatus.IN_PROGRESS, IssueStatus.REOPENED, IssueStatus.ASSIGNED],
         IssueStatus.VERIFIED: [IssueStatus.CLOSED, IssueStatus.REOPENED],
         IssueStatus.CLOSED: [IssueStatus.REOPENED],
         IssueStatus.REOPENED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.ASSIGNED],
@@ -47,18 +47,18 @@ class LifecycleService:
             IssueStatus.CLOSED: [IssueStatus.REOPENED],
         },
         Role.DEPARTMENT_OFFICER: {
-            IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED],
-            IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED],
+            IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.ASSIGNED],
+            IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.ASSIGNED],
             IssueStatus.ACCEPTED: [IssueStatus.ASSIGNED, IssueStatus.REJECTED, IssueStatus.UNDER_REVIEW],
             IssueStatus.ASSIGNED: [IssueStatus.ASSIGNED, IssueStatus.ACCEPTED], # Reassign or unassign
             IssueStatus.REOPENED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.ASSIGNED],
         },
         Role.SUPERVISOR: {
-            IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED],
-            IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED],
+            IssueStatus.SUBMITTED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.ASSIGNED],
+            IssueStatus.UNDER_REVIEW: [IssueStatus.ACCEPTED, IssueStatus.REJECTED, IssueStatus.ASSIGNED],
             IssueStatus.ACCEPTED: [IssueStatus.ASSIGNED, IssueStatus.REJECTED],
             IssueStatus.ASSIGNED: [IssueStatus.ASSIGNED, IssueStatus.ACCEPTED],
-            IssueStatus.DONE: [IssueStatus.VERIFIED, IssueStatus.IN_PROGRESS],
+            IssueStatus.DONE: [IssueStatus.VERIFIED, IssueStatus.IN_PROGRESS, IssueStatus.ASSIGNED],
             IssueStatus.VERIFIED: [IssueStatus.CLOSED],
             IssueStatus.REOPENED: [IssueStatus.UNDER_REVIEW, IssueStatus.ACCEPTED, IssueStatus.ASSIGNED],
         },
@@ -144,7 +144,13 @@ class LifecycleService:
         # Department boundary enforcement for officers / supervisors / workers
         if user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR]:
             if user.department and issue.department and user.department != issue.department:
-                raise PermissionDenied("You can only manage issues assigned to your own department.")
+                # If officer is taking ownership to dispatch a technician from their department, allow adopting ticket
+                if to_status == IssueStatus.ASSIGNED and assigned_worker and hasattr(assigned_worker, 'worker_profile') and assigned_worker.worker_profile.department == user.department:
+                    issue.department = user.department
+                elif to_status == IssueStatus.ASSIGNED:
+                    issue.department = user.department
+                else:
+                    raise PermissionDenied("You can only manage issues assigned to your own department.")
         
         if user.role == Role.WORKER:
             if issue.assigned_worker != user:
@@ -164,9 +170,9 @@ class LifecycleService:
                 raise ValidationError({"assigned_worker_id": "An assigned worker is required for ASSIGNED status."})
             if assigned_worker.role != Role.WORKER:
                 raise ValidationError({"assigned_worker_id": "Assigned user must have the WORKER role."})
-            if issue.department and hasattr(assigned_worker, 'worker_profile'):
-                if assigned_worker.worker_profile.department != issue.department:
-                    raise ValidationError({"assigned_worker_id": "Worker does not belong to the responsible department."})
+            if hasattr(assigned_worker, 'worker_profile') and assigned_worker.worker_profile.department:
+                if issue.department and assigned_worker.worker_profile.department != issue.department:
+                    issue.department = assigned_worker.worker_profile.department
 
         with transaction.atomic():
             # 2. Update issue fields
@@ -176,7 +182,7 @@ class LifecycleService:
                 issue.priority = new_priority
                 issue.sla_deadline = cls.calculate_sla_deadline(new_priority, base_time=issue.created_at)
 
-            if to_status == IssueStatus.ACCEPTED and not issue.sla_deadline:
+            if to_status in [IssueStatus.ACCEPTED, IssueStatus.ASSIGNED] and not issue.sla_deadline:
                 issue.sla_deadline = cls.calculate_sla_deadline(issue.priority)
 
             if to_status == IssueStatus.REJECTED:

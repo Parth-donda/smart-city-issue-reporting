@@ -163,6 +163,10 @@ export const OfficerDashboard: React.FC = () => {
     setAssignNotes('');
     setRejectionNotes('');
 
+    if (workers.length > 0 && !selectedWorkerId) {
+      setSelectedWorkerId(String(workers[0].id));
+    }
+
     // Fetch full issue details
     try {
       const fullDetail = await api.getIssueDetail(issue.issue_id);
@@ -202,14 +206,16 @@ export const OfficerDashboard: React.FC = () => {
       setActionTab('ASSIGN'); // Guide officer directly to next step (assigning worker)
       api.getDepartmentSummary().then(setSummary);
     } catch (err: any) {
-      setActionError(err.detail || err.error || 'Failed to accept issue.');
+      const errMsg = err?.detail || err?.error || (Array.isArray(err) ? err[0] : typeof err === 'object' ? Object.values(err)[0] : null) || 'Failed to accept issue.';
+      setActionError(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
     } finally {
       setIsActionLoading(false);
     }
   };
 
   const handleAssignWorkerSubmit = async () => {
-    if (!activeIssue || !selectedWorkerId) {
+    const workerToAssign = selectedWorkerId || (workers.length > 0 ? String(workers[0].id) : '');
+    if (!activeIssue || !workerToAssign) {
       setActionError('Please select a valid field technician.');
       return;
     }
@@ -217,12 +223,13 @@ export const OfficerDashboard: React.FC = () => {
     setActionError(null);
     try {
       await api.assignWorker(activeIssue.issue_id, {
-        worker_id: Number(selectedWorkerId),
+        worker_id: Number(workerToAssign),
         notes: assignNotes || 'Assigned to field technician for repair dispatch.',
       });
       handleCloseDrawer();
     } catch (err: any) {
-      setActionError(err.detail || err.error || 'Failed to assign worker.');
+      const errMsg = err?.detail || err?.error || (Array.isArray(err) ? err[0] : typeof err === 'object' ? Object.values(err)[0] : null) || 'Failed to assign worker.';
+      setActionError(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
     } finally {
       setIsActionLoading(false);
     }
@@ -245,7 +252,8 @@ export const OfficerDashboard: React.FC = () => {
       });
       handleCloseDrawer();
     } catch (err: any) {
-      setActionError(err.detail || err.error || 'Failed to reject issue.');
+      const errMsg = err?.detail || err?.error || (Array.isArray(err) ? err[0] : typeof err === 'object' ? Object.values(err)[0] : null) || 'Failed to reject issue.';
+      setActionError(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
     } finally {
       setIsActionLoading(false);
     }
@@ -631,10 +639,17 @@ export const OfficerDashboard: React.FC = () => {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => setActionTab('ASSIGN')}
+                  onClick={() => {
+                    if (actionTab === 'ASSIGN') {
+                      handleAssignWorkerSubmit();
+                    } else {
+                      setActionTab('ASSIGN');
+                    }
+                  }}
+                  disabled={isActionLoading}
                   leftIcon={<UserCheck className="w-3.5 h-3.5" />}
                 >
-                  Assign Field Worker
+                  {actionTab === 'ASSIGN' ? (isActionLoading ? 'Dispatching...' : 'Dispatch Work Order') : 'Assign Field Worker'}
                 </Button>
               </div>
             </div>
@@ -906,7 +921,7 @@ export const OfficerDashboard: React.FC = () => {
                       Select Department Worker ({workers.length} available)
                     </label>
                     <select
-                      value={selectedWorkerId}
+                      value={selectedWorkerId || (workers.length > 0 ? String(workers[0].id) : '')}
                       onChange={(e) => setSelectedWorkerId(e.target.value)}
                       className="w-full px-3 py-2 text-xs bg-card border border-line rounded-input focus:ring-2 focus:ring-primary-600 text-ink-950"
                     >
@@ -928,6 +943,13 @@ export const OfficerDashboard: React.FC = () => {
                       className="w-full p-2.5 text-xs bg-card border border-line rounded-input focus:ring-2 focus:ring-primary-600 text-ink-950"
                     />
                   </div>
+
+                  {actionError && (
+                    <div className="p-2.5 bg-semantic-danger/10 border border-semantic-danger/30 rounded-input text-xs text-semantic-danger font-medium flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{actionError}</span>
+                    </div>
+                  )}
 
                   <Button
                     variant="primary"

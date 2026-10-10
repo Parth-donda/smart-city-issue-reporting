@@ -35,12 +35,27 @@ class IssueSummaryView(APIView):
         user = request.user
         qs = Issue.objects.all()
 
+        dept_param = request.query_params.get('department')
         if user.role == Role.CITIZEN:
             qs = qs.filter(citizen=user)
-        elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR] and user.department:
-            qs = qs.filter(department=user.department)
+        elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR]:
+            if dept_param == 'ALL':
+                pass
+            elif dept_param and dept_param != 'ALL':
+                if dept_param.isdigit():
+                    qs = qs.filter(department_id=dept_param)
+                else:
+                    qs = qs.filter(department__code=dept_param)
+            elif user.department:
+                qs = qs.filter(department=user.department)
         elif user.role == Role.WORKER:
             qs = qs.filter(assigned_worker=user)
+        elif user.role in [Role.MUNICIPAL_ADMIN, Role.SYSTEM_ADMIN]:
+            if dept_param and dept_param != 'ALL':
+                if dept_param.isdigit():
+                    qs = qs.filter(department_id=dept_param)
+                else:
+                    qs = qs.filter(department__code=dept_param)
 
         now = timezone.now()
         warning_window = now + timezone.timedelta(hours=6)
@@ -124,12 +139,27 @@ class IssueListCreateView(generics.ListCreateAPIView):
         queryset = Issue.objects.select_related('category', 'department', 'citizen', 'location', 'assigned_worker').prefetch_related('images')
 
         # Filter by role
+        dept_param = self.request.query_params.get('department')
         if user.role == Role.CITIZEN:
             queryset = queryset.filter(citizen=user)
-        elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR] and user.department:
-            queryset = queryset.filter(department=user.department)
+        elif user.role in [Role.DEPARTMENT_OFFICER, Role.SUPERVISOR]:
+            if dept_param == 'ALL':
+                pass # Allow cross-department inspection
+            elif dept_param and dept_param != 'ALL':
+                if dept_param.isdigit():
+                    queryset = queryset.filter(department_id=dept_param)
+                else:
+                    queryset = queryset.filter(department__code=dept_param)
+            elif user.department:
+                queryset = queryset.filter(department=user.department)
         elif user.role == Role.WORKER:
             queryset = queryset.filter(assigned_worker=user)
+        elif user.role in [Role.MUNICIPAL_ADMIN, Role.SYSTEM_ADMIN]:
+            if dept_param and dept_param != 'ALL':
+                if dept_param.isdigit():
+                    queryset = queryset.filter(department_id=dept_param)
+                else:
+                    queryset = queryset.filter(department__code=dept_param)
 
         # Tab filtering shortcut
         tab_param = self.request.query_params.get('tab')

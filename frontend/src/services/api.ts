@@ -159,6 +159,7 @@ class ApiService {
     status?: string;
     priority?: string;
     category?: string | number;
+    department?: string | number;
     ward?: string;
     search?: string;
     ordering?: string;

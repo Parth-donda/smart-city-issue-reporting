@@ -127,6 +127,7 @@ export interface Issue {
   priority_display: string;
   status: IssueStatus;
   status_display: string;
+  citizen?: any;
   citizen_name?: string;
   assigned_worker_name?: string;
   assigned_worker?: any;

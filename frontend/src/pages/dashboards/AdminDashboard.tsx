@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import { PriorityBadge } from '../../components/ui/Badge';
+import { StatusBadge, PriorityBadge } from '../../components/ui/Badge';
 import { api } from '../../services/api';
-import { IssueCategory } from '../../types/issues';
+import { Issue, IssueCategory } from '../../types/issues';
 import {
   LogOut,
   Building2,
@@ -16,7 +17,15 @@ import {
   RefreshCw,
   Edit,
   Activity,
-  BarChart3
+  BarChart3,
+  FileText,
+  MapPin,
+  User,
+  ExternalLink,
+  Calendar,
+  Mail,
+  Inbox,
+  ArrowRight
 } from 'lucide-react';
 import {
   BarChart,
@@ -32,7 +41,7 @@ import {
   Legend
 } from 'recharts';
 
-type AdminTab = 'ANALYTICS' | 'ROUTING' | 'SLA_CONFIG' | 'AUDIT_LOGS';
+type AdminTab = 'ISSUES' | 'ANALYTICS' | 'ROUTING' | 'SLA_CONFIG' | 'AUDIT_LOGS';
 
 interface AdminOverviewData {
   total_issues: number;
@@ -81,7 +90,7 @@ const STATUS_COLORS: Record<string, string> = {
 export const AdminDashboard: React.FC = () => {
   const { logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<AdminTab>('ANALYTICS');
+  const [activeTab, setActiveTab] = useState<AdminTab>('ISSUES');
   const [overview, setOverview] = useState<AdminOverviewData | null>(null);
   const [categories, setCategories] = useState<IssueCategory[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -90,12 +99,39 @@ export const AdminDashboard: React.FC = () => {
   const [auditSearch, setAuditSearch] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Issues Tab State
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [issueSearch, setIssueSearch] = useState<string>('');
+  const [issueDeptFilter, setIssueDeptFilter] = useState<string>('ALL');
+  const [issueStatusFilter, setIssueStatusFilter] = useState<string>('ALL');
+  const [issuePriorityFilter, setIssuePriorityFilter] = useState<string>('ALL');
+  const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(false);
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
   // Category Edit State
   const [editingCategory, setEditingCategory] = useState<IssueCategory | null>(null);
   const [editDeptId, setEditDeptId] = useState<number | ''>('');
   const [editPriority, setEditPriority] = useState<string>('MEDIUM');
   const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
   const [categorySaveMsg, setCategorySaveMsg] = useState<string | null>(null);
+
+  const fetchAdminIssues = async () => {
+    setIsIssuesLoading(true);
+    try {
+      const res = await api.getIssues({
+        department: issueDeptFilter !== 'ALL' ? issueDeptFilter : undefined,
+        status: issueStatusFilter !== 'ALL' ? issueStatusFilter : undefined,
+        priority: issuePriorityFilter !== 'ALL' ? issuePriorityFilter : undefined,
+        search: issueSearch.trim() || undefined,
+      });
+      const list = Array.isArray(res) ? res : res.results || [];
+      setIssues(list);
+    } catch (err) {
+      console.error('Failed to load issues for admin:', err);
+    } finally {
+      setIsIssuesLoading(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     setIsLoading(true);
@@ -122,7 +158,14 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
+    fetchAdminIssues();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'ISSUES') {
+      fetchAdminIssues();
+    }
+  }, [activeTab, issueDeptFilter, issueStatusFilter, issuePriorityFilter]);
 
   const handleAuditSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +326,17 @@ export const AdminDashboard: React.FC = () => {
       {/* Tabs Navigation */}
       <div className="flex border-b border-line gap-2 text-xs font-semibold overflow-x-auto pb-1">
         <button
+          onClick={() => setActiveTab('ISSUES')}
+          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
+            activeTab === 'ISSUES'
+              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
+              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          Civic Issues Registry ({overview?.total_issues ?? issues.length})
+        </button>
+        <button
           onClick={() => setActiveTab('ANALYTICS')}
           className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
             activeTab === 'ANALYTICS'
@@ -327,6 +381,187 @@ export const AdminDashboard: React.FC = () => {
           Master Audit Ledger ({filteredAuditLogs.length})
         </button>
       </div>
+
+      {/* TAB 0: ALL CIVIC ISSUES */}
+      {activeTab === 'ISSUES' && (
+        <div className="space-y-4">
+          <Card className="border-line bg-card">
+            <CardHeader className="pb-3 border-b border-line">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary-700" />
+                    City-Wide Civic Grievances Registry
+                  </CardTitle>
+                  <CardDescription className="text-xs text-ink-500">
+                    Live city-wide view of grievances reported by citizens across all municipal departments.
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={fetchAdminIssues}
+                  isLoading={isIssuesLoading}
+                  leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                >
+                  Reload Issues
+                </Button>
+              </div>
+
+              {/* Filters & Search Toolbar */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search ticket ID, title, citizen, ward..."
+                    value={issueSearch}
+                    onChange={(e) => setIssueSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') fetchAdminIssues();
+                    }}
+                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface border border-line rounded-input focus:outline-none focus:ring-2 focus:ring-primary-600 text-ink-950"
+                  />
+                </div>
+
+                <select
+                  value={issueDeptFilter}
+                  onChange={(e) => setIssueDeptFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-surface border border-line rounded-input text-ink-950 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                >
+                  <option value="ALL">All Municipal Departments</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} ({d.code})
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={issueStatusFilter}
+                  onChange={(e) => setIssueStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-surface border border-line rounded-input text-ink-950 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                >
+                  <option value="ALL">All Statuses</option>
+                  <option value="SUBMITTED">Submitted (New Intake)</option>
+                  <option value="UNDER_REVIEW">Under Review</option>
+                  <option value="ACCEPTED">Accepted</option>
+                  <option value="ASSIGNED">Assigned</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="DONE">Done / Resolved</option>
+                  <option value="VERIFIED">Verified</option>
+                  <option value="CLOSED">Closed</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="REOPENED">Reopened</option>
+                </select>
+
+                <select
+                  value={issuePriorityFilter}
+                  onChange={(e) => setIssuePriorityFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-surface border border-line rounded-input text-ink-950 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                >
+                  <option value="ALL">All Priorities</option>
+                  <option value="CRITICAL">Critical Priority</option>
+                  <option value="HIGH">High Priority</option>
+                  <option value="MEDIUM">Medium Priority</option>
+                  <option value="LOW">Low Priority</option>
+                </select>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-4 sm:p-5">
+              {isIssuesLoading ? (
+                <div className="py-16 text-center text-xs text-ink-500 flex flex-col items-center justify-center gap-2">
+                  <RefreshCw className="w-5 h-5 animate-spin text-primary-700" />
+                  <span>Loading municipal grievances...</span>
+                </div>
+              ) : issues.length === 0 ? (
+                <div className="py-14 text-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-surface mx-auto flex items-center justify-center text-ink-400">
+                    <Inbox className="w-6 h-6" />
+                  </div>
+                  <p className="text-sm font-semibold text-ink-950">No civic issues found</p>
+                  <p className="text-xs text-ink-500 max-w-sm mx-auto">
+                    No grievances currently match your filter criteria. Citizen submissions will appear here automatically.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {issues.map((issue) => (
+                    <div
+                      key={issue.id}
+                      className="p-4 rounded-xl border border-line bg-card hover:border-primary-600/60 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs"
+                    >
+                      <div className="space-y-2 min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary-100 text-primary-800 border border-primary-200">
+                            {issue.issue_id}
+                          </span>
+                          <StatusBadge status={issue.status as any} size="sm" />
+                          <PriorityBadge priority={issue.priority as any} size="sm" />
+                          {issue.department && (
+                            <span className="text-[11px] font-semibold text-ink-700 px-2 py-0.5 rounded bg-surface border border-line">
+                              {issue.department.name}
+                            </span>
+                          )}
+                          {issue.category && (
+                            <span className="text-[11px] text-ink-500 font-mono">
+                              • {issue.category.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold text-sm text-ink-950 leading-snug">
+                            {issue.title}
+                          </h4>
+                          <p className="text-xs text-ink-600 mt-1 line-clamp-2 leading-relaxed">
+                            {issue.description}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-500 pt-1">
+                          <span className="flex items-center gap-1">
+                            <User className="w-3.5 h-3.5 text-primary-700" />
+                            <strong>Reported by:</strong> {issue.citizen ? `${issue.citizen.first_name || ''} ${issue.citizen.last_name || ''} (${issue.citizen.username})`.trim() : 'Public Citizen'}
+                          </span>
+                          {issue.location?.address_text && (
+                            <span className="flex items-center gap-1 truncate max-w-xs">
+                              <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                              <span className="truncate">{issue.location.address_text}</span>
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 font-mono text-[11px]">
+                            <Calendar className="w-3 h-3 text-ink-400" />
+                            {new Date(issue.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
+                        <Link to={`/track/${issue.issue_id}`} target="_blank" rel="noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs" rightIcon={<ExternalLink className="w-3 h-3" />}>
+                            Public Tracker
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => setSelectedIssue(issue)}
+                          className="bg-primary-700 hover:bg-primary-800 text-white text-xs"
+                          rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                        >
+                          View Details & Timeline
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* TAB 1: EXECUTIVE ANALYTICS */}
       {activeTab === 'ANALYTICS' && (
@@ -714,6 +949,114 @@ export const AdminDashboard: React.FC = () => {
                 onClick={handleSaveCategory}
               >
                 Save Routing
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Selected Issue Inspection Modal */}
+      {selectedIssue && (
+        <Modal
+          isOpen={!!selectedIssue}
+          onClose={() => setSelectedIssue(null)}
+          title={`Grievance Dossier: ${selectedIssue.issue_id}`}
+          maxWidth="lg"
+        >
+          <div className="space-y-5 text-ink-950">
+            {/* Status & Priority Ribbon */}
+            <div className="p-3.5 bg-surface border border-line rounded-xl flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={selectedIssue.status as any} />
+                <PriorityBadge priority={selectedIssue.priority as any} />
+                {selectedIssue.department && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-card border border-line text-ink-800">
+                    Dept: {selectedIssue.department.name}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] font-mono text-ink-500">
+                Created: {new Date(selectedIssue.created_at).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Title & Description */}
+            <div className="space-y-1.5">
+              <h3 className="font-heading font-bold text-base text-ink-950">
+                {selectedIssue.title}
+              </h3>
+              <p className="text-xs text-ink-700 leading-relaxed whitespace-pre-wrap bg-surface/50 p-3 rounded-lg border border-line">
+                {selectedIssue.description}
+              </p>
+            </div>
+
+            {/* Reporter Citizen Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-surface rounded-xl border border-line text-xs">
+              <div className="space-y-1">
+                <span className="text-[10px] font-mono uppercase text-ink-400 font-bold block">
+                  Reporting Citizen
+                </span>
+                <p className="font-semibold text-ink-950 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-primary-700" />
+                  {selectedIssue.citizen
+                    ? `${selectedIssue.citizen.first_name || ''} ${selectedIssue.citizen.last_name || ''}`.trim() || selectedIssue.citizen.username
+                    : 'Registered Citizen'}
+                </p>
+                {selectedIssue.citizen?.email && (
+                  <p className="text-ink-500 flex items-center gap-1 font-mono text-[11px]">
+                    <Mail className="w-3 h-3" /> {selectedIssue.citizen.email}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-mono uppercase text-ink-400 font-bold block">
+                  Field Location
+                </span>
+                <p className="font-medium text-ink-950 flex items-start gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                  <span>{selectedIssue.location?.address_text || 'GPS Coordinates Attached'}</span>
+                </p>
+                {selectedIssue.location?.ward && (
+                  <p className="text-ink-500 text-[11px] font-mono">
+                    Ward: {selectedIssue.location.ward}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Attached Photos / Evidence */}
+            {selectedIssue.images && selectedIssue.images.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-ink-700 block">
+                  Photographic Evidence ({selectedIssue.images.length})
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {selectedIssue.images.map((img: any, idx: number) => (
+                    <div key={idx} className="relative rounded-lg overflow-hidden border border-line aspect-video bg-ink-950">
+                      <img
+                        src={img.image}
+                        alt={`Evidence ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions footer */}
+            <div className="pt-3 border-t border-line flex items-center justify-between">
+              <Link
+                to={`/track/${selectedIssue.issue_id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-primary-700 hover:underline font-semibold inline-flex items-center gap-1"
+              >
+                Open in Full Live Tracker <ExternalLink className="w-3 h-3" />
+              </Link>
+              <Button variant="secondary" size="sm" onClick={() => setSelectedIssue(null)}>
+                Close
               </Button>
             </div>
           </div>

@@ -75,6 +75,3 @@ npm install
 # Start development server (http://localhost:5173/)
 npm run dev
 ```
-
-### 3. Design System Preview Route
-Visit **[http://localhost:5173/design-system](http://localhost:5173/design-system)** to review the interactive design system catalog containing all components, status badges, priority maps, steppers, and layout shells.

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Home, FilePlus2, Search, Palette, LayoutDashboard } from 'lucide-react';
+import { Home, FilePlus2, Search, LayoutDashboard } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppShell, NavItem } from './components/layout/AppShell';
@@ -9,7 +9,6 @@ import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { DesignSystemPage } from './pages/DesignSystemPage';
 import { ReportIssuePage } from './pages/ReportIssuePage';
 import { TrackIssuePage } from './pages/TrackIssuePage';
 import { CitizenDashboard } from './pages/dashboards/CitizenDashboard';
@@ -37,7 +36,6 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (path === '/') return 'home';
     if (path.startsWith('/report')) return 'report';
     if (path.startsWith('/track')) return 'track';
-    if (path.includes('design-system')) return 'design-system';
     if (path.includes('citizen')) return 'citizen-dashboard';
     if (path.includes('officer')) return 'officer-dashboard';
     if (path.includes('worker')) return 'worker-dashboard';
@@ -50,7 +48,6 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (id === 'home') navigate('/');
     else if (id === 'report') navigate('/report');
     else if (id === 'track') navigate('/track');
-    else if (id === 'design-system') navigate('/design-system');
     else if (id === 'citizen-dashboard') navigate('/citizen');
     else if (id === 'officer-dashboard') navigate('/officer');
     else if (id === 'worker-dashboard') navigate('/worker');
@@ -75,7 +72,6 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     { id: 'report', label: 'Report Issue', icon: FilePlus2 },
     { id: 'track', label: 'Track Status', icon: Search },
     { id: 'dashboard', label: user ? 'My Workspace' : 'Sign In / Portal', icon: LayoutDashboard },
-    { id: 'design-system', label: 'Design System', icon: Palette },
   ];
 
   return (
@@ -134,16 +130,6 @@ export function App() {
               }
             />
             
-            {/* Design System Catalog */}
-            <Route
-              path="/design-system"
-              element={
-                <ShellWrapper>
-                  <DesignSystemPage />
-                </ShellWrapper>
-              }
-            />
-
             {/* Protected Role Dashboards */}
             <Route
               path="/citizen"

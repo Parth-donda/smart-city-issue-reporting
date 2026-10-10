@@ -9,7 +9,6 @@ import {
   Menu,
   X,
   Shield,
-  Palette,
   CheckCheck,
   AlertTriangle,
   Clock,
@@ -215,14 +214,13 @@ const DEFAULT_NAV: NavItem[] = [
   { id: 'departments', label: 'Departments', icon: Building2 },
   { id: 'users', label: 'Team & Workers', icon: Users },
   { id: 'analytics', label: 'City Analytics', icon: BarChart3 },
-  { id: 'design-system', label: 'Design System', icon: Palette },
 ];
 
 export const AppShell: React.FC<AppShellProps> = ({
   children,
   userRole = 'Municipal Admin',
   userName = 'Admin User',
-  activeNavId = 'design-system',
+  activeNavId = 'issues',
   onNavigate,
   navItems = DEFAULT_NAV,
 }) => {

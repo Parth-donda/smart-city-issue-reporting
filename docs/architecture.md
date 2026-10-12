@@ -81,4 +81,3 @@ SmartCivic is an evidence-based, location-aware civic issue management platform 
 - **Gradients**:
   - `hero-gradient`: `linear-gradient(135deg, #0A1A2A 0%, #0B3B45 55%, #0B5F63 100%)` (Hero/Auth side panel only)
   - `data-fade`: `linear-gradient(180deg, rgba(14,115,120,0.18) 0%, rgba(14,115,120,0) 100%)` (Area chart fills only)
-

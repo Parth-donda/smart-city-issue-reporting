@@ -14,6 +14,7 @@ import {
   DepartmentWorker,
   IssueCategory
 } from '../../types/issues';
+import { IssueGISMap } from '../../components/location/IssueGISMap';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -28,7 +29,9 @@ import {
   MapPin,
   ShieldCheck,
   Building2,
-  Inbox
+  Inbox,
+  Flame,
+  Table as TableIcon
 } from 'lucide-react';
 
 const REJECTION_REASONS = [
@@ -57,6 +60,7 @@ export const OfficerDashboard: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('created_desc');
+  const [displayMode, setDisplayMode] = useState<'TABLE' | 'GIS_MAP'>('TABLE');
 
   // Triage Drawer state
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
@@ -479,22 +483,59 @@ export const OfficerDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Issue Intake Queue Table */}
+      {/* Issue Intake Queue Table & GIS Map */}
       <Card>
-        <CardHeader className="p-4 border-b border-line flex flex-row items-center justify-between">
+        <CardHeader className="p-4 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Grievance Intake & Dispatch Table</CardTitle>
+            <CardTitle className="text-base">Grievance Intake & Dispatch Desk</CardTitle>
             <CardDescription className="text-xs">
               Showing {issues.length} tickets matching active filters
             </CardDescription>
           </div>
+
+          <div className="bg-surface p-1 rounded-xl border border-line flex items-center shadow-xs">
+            <button
+              type="button"
+              onClick={() => setDisplayMode('TABLE')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                displayMode === 'TABLE'
+                  ? 'bg-card text-ink-950 shadow-xs border border-line/60'
+                  : 'text-ink-500 hover:text-ink-950'
+              }`}
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDisplayMode('GIS_MAP')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                displayMode === 'GIS_MAP'
+                  ? 'bg-primary-700 text-white shadow-xs'
+                  : 'text-ink-500 hover:text-ink-950'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" />
+              <span>GIS Map & Heatmap</span>
+            </button>
+          </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-surface/80 border-b border-line text-ink-500 font-mono uppercase text-[11px]">
-                <th className="py-3 px-4 font-semibold">Issue Ref</th>
+        {displayMode === 'GIS_MAP' ? (
+          <div className="p-4">
+            <IssueGISMap
+              issues={issues}
+              onSelectIssue={handleOpenTriage}
+              height="600px"
+              defaultViewMode="heatmap"
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-surface/80 border-b border-line text-ink-500 font-mono uppercase text-[11px]">
+                  <th className="py-3 px-4 font-semibold">Issue Ref</th>
                 <th className="py-3 px-4 font-semibold">Title & Category</th>
                 <th className="py-3 px-4 font-semibold">Citizen / Location</th>
                 <th className="py-3 px-4 font-semibold">Priority</th>
@@ -613,7 +654,8 @@ export const OfficerDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </Card>
+      )}
+    </Card>
 
       {/* Comprehensive Triage & Work Order Assignment Drawer */}
       {activeIssue && (

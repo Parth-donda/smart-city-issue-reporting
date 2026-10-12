@@ -25,8 +25,10 @@ import {
   Calendar,
   Mail,
   Inbox,
-  ArrowRight
+  ArrowRight,
+  Flame,
 } from 'lucide-react';
+import { IssueGISMap } from '../../components/location/IssueGISMap';
 import {
   BarChart,
   Bar,
@@ -41,7 +43,7 @@ import {
   Legend
 } from 'recharts';
 
-type AdminTab = 'ISSUES' | 'ANALYTICS' | 'ROUTING' | 'SLA_CONFIG' | 'AUDIT_LOGS';
+type AdminTab = 'ISSUES' | 'GIS_MAP' | 'ANALYTICS' | 'ROUTING' | 'SLA_CONFIG' | 'AUDIT_LOGS';
 
 interface AdminOverviewData {
   total_issues: number;
@@ -339,6 +341,17 @@ export const AdminDashboard: React.FC = () => {
           Civic Issues Registry ({overview?.total_issues ?? issues.length})
         </button>
         <button
+          onClick={() => setActiveTab('GIS_MAP')}
+          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
+            activeTab === 'GIS_MAP'
+              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
+              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
+          }`}
+        >
+          <Flame className="w-4 h-4 text-rose-600" />
+          City GIS Map & Heatmap
+        </button>
+        <button
           onClick={() => setActiveTab('ANALYTICS')}
           className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
             activeTab === 'ANALYTICS'
@@ -560,6 +573,44 @@ export const AdminDashboard: React.FC = () => {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB: CITY GIS MAP & HEATMAP */}
+      {activeTab === 'GIS_MAP' && (
+        <div className="space-y-4">
+          <Card className="border-line bg-card">
+            <CardHeader className="pb-3 border-b border-line">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-rose-600" />
+                    City-Wide Infrastructure Defect Density & Heatmap
+                  </CardTitle>
+                  <CardDescription className="text-xs text-ink-500">
+                    Geospatial clustering and hotspot density visualization across all municipal wards.
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={fetchAdminIssues}
+                  isLoading={isIssuesLoading}
+                  leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                >
+                  Sync Map Points
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <IssueGISMap
+                issues={issues}
+                onSelectIssue={(issue) => setSelectedIssue(issue)}
+                height="620px"
+                defaultViewMode="heatmap"
+              />
             </CardContent>
           </Card>
         </div>

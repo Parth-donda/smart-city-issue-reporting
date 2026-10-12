@@ -242,9 +242,9 @@ export const AppShell: React.FC<AppShellProps> = ({
   return (
     <div className="min-h-screen flex bg-surface text-ink-950 font-sans">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-card border-r border-line shrink-0">
+      <aside className="hidden md:flex flex-col w-64 bg-card border-r border-line shrink-0 sticky top-0 h-screen z-30">
         {/* Brand / Logo */}
-        <div className="h-16 px-6 border-b border-line flex items-center">
+        <div className="h-16 px-6 border-b border-line flex items-center shrink-0">
           <div>
             <h1 className="font-heading font-bold text-lg tracking-tight text-ink-950">
               SmartCivic
@@ -256,7 +256,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.id === activeNavId;
@@ -290,7 +290,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         </nav>
 
         {/* Sidebar Footer with Sign Out Option */}
-        <div className="p-3 border-t border-line bg-surface/30">
+        <div className="p-3 border-t border-line bg-surface/30 shrink-0">
           <button
             type="button"
             onClick={handleSignOut}

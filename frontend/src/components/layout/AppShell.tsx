@@ -288,19 +288,6 @@ export const AppShell: React.FC<AppShellProps> = ({
             );
           })}
         </nav>
-
-        {/* Sidebar Footer with Sign Out Option */}
-        <div className="p-3 border-t border-line bg-surface/30 shrink-0">
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50/80 rounded-button transition-colors cursor-pointer"
-            title="Sign Out of Session"
-          >
-            <LogOut className="w-4 h-4 shrink-0" />
-            <span>Sign Out</span>
-          </button>
-        </div>
       </aside>
 
       {/* Main Content Area */}

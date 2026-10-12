@@ -8,7 +8,6 @@ import {
   Bell,
   Menu,
   X,
-  Shield,
   CheckCheck,
   AlertTriangle,
   Clock,
@@ -20,6 +19,7 @@ import { UserRole } from '../../types/design-system';
 import { NotificationItem } from '../../types/issues';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { UserProfileDropdown } from './UserProfileDropdown';
 
 export interface NavItem {
   id: string;
@@ -315,33 +315,8 @@ export const AppShell: React.FC<AppShellProps> = ({
 
             <div className="h-6 w-px bg-line" />
 
-            {/* User Profile Widget & Sign Out */}
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="flex items-center gap-2 py-1 px-2.5 rounded-lg bg-surface border border-line shadow-2xs">
-                <div className="w-8 h-8 rounded-full bg-primary-700/10 text-primary-700 flex items-center justify-center font-bold text-xs border border-primary-600/20 shrink-0">
-                  {userInitials}
-                </div>
-                <div className="flex flex-col min-w-0 text-left">
-                  <span className="text-xs font-semibold text-ink-950 truncate max-w-[120px] leading-tight">
-                    {displayName}
-                  </span>
-                  <div className="flex items-center gap-1 text-[10px] text-ink-500 font-mono uppercase tracking-wider">
-                    <Shield className="w-3 h-3 text-primary-600 shrink-0" />
-                    <span className="truncate max-w-[100px]">{displayRole}</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-button transition-all duration-150 cursor-pointer shadow-2xs"
-                title="Sign out of account"
-              >
-                <LogOut className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </div>
+            {/* User Profile Menu & Sign Out Dropdown */}
+            <UserProfileDropdown />
           </div>
         </header>
 

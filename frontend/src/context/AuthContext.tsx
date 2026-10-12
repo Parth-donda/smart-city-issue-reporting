@@ -9,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<User>;
   register: (data: any) => Promise<User>;
+  updateProfile: (data: Partial<User>) => Promise<User>;
   logout: () => void;
   getDashboardRoute: (role?: UserRole) => string;
 }
@@ -73,6 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const updateProfile = async (data: Partial<User>): Promise<User> => {
+    const updated = await api.updateMe(data);
+    setUser(updated);
+    return updated;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -82,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         register,
+        updateProfile,
         logout,
         getDashboardRoute: (r?: UserRole) => getDashboardRouteForRole(r || user?.role),
       }}

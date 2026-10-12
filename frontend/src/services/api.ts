@@ -139,6 +139,15 @@ class ApiService {
     return user;
   }
 
+  public async updateMe(data: Partial<User>): Promise<User> {
+    const user = await this.request<User>('/auth/me/', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    this.setUser(user);
+    return user;
+  }
+
   // --- Categories & Departments ---
   public async getCategories(): Promise<IssueCategory[]> {
     return this.request<IssueCategory[]>('/issues/categories/');

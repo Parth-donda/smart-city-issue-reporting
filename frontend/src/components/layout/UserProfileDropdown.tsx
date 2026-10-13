@@ -197,7 +197,7 @@ export const UserProfileDropdown: React.FC = () => {
               <h3 className="font-heading font-bold text-sm text-ink-950 truncate">
                 {displayName}
               </h3>
-              <p className="text-xs text-ink-500 font-mono truncate">@{user.username}</p>
+              <p className="text-xs text-ink-500 font-mono truncate">{user.username}</p>
               {user.email && (
                 <p className="text-xs text-ink-500 flex items-center gap-1.5 mt-1 truncate">
                   <Mail className="w-3 h-3 text-ink-400 shrink-0" />
@@ -232,9 +232,7 @@ export const UserProfileDropdown: React.FC = () => {
               </div>
             )}
 
-            <p className="text-[11px] text-ink-500 leading-relaxed bg-surface/40 p-2 rounded-lg border border-line/40">
-              {roleInfo.description}
-            </p>
+            
           </div>
 
           {/* Action Menu Items */}
@@ -249,18 +247,7 @@ export const UserProfileDropdown: React.FC = () => {
               <span>Edit Profile Information</span>
             </button>
 
-            {/* Dashboard Workspace Shortcut */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                navigate(getDashboardRoute());
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-ink-700 hover:text-primary-700 hover:bg-surface rounded-xl transition-colors cursor-pointer text-left"
-            >
-              <LayoutDashboard className="w-4 h-4 text-ink-500 shrink-0" />
-              <span>Go to My Workspace</span>
-            </button>
+            
           </div>
 
           {/* Sign Out Option */}

@@ -2,13 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   AlertTriangle,
-  Lightbulb,
-  Trash,
-  Droplets,
-  Waves,
-  Trees,
-  Dog,
-  TrafficCone,
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
@@ -34,29 +27,47 @@ interface Category {
   code: string;
   description: string;
   default_priority: string;
-  icon_name: string;
+  icon_name?: string;
 }
 
 const FALLBACK_CATEGORIES: Category[] = [
-  { id: 1, name: 'Pothole & Road Damage', code: 'POTHOLE', description: 'Crater, uneven surface, missing manhole', default_priority: 'HIGH', icon_name: 'AlertTriangle' },
-  { id: 2, name: 'Streetlight & Electrical', code: 'STREETLIGHT', description: 'Non-functional lamp, exposed wire, flickering pole', default_priority: 'MEDIUM', icon_name: 'Lightbulb' },
-  { id: 3, name: 'Garbage & Solid Waste', code: 'GARBAGE', description: 'Overflowing bin, roadside dumping, missed collection', default_priority: 'MEDIUM', icon_name: 'Trash' },
-  { id: 4, name: 'Water Supply & Leakage', code: 'WATER_LEAK', description: 'Pipeline burst, contaminated water, low pressure', default_priority: 'HIGH', icon_name: 'Droplets' },
-  { id: 5, name: 'Drainage & Waterlogging', code: 'DRAINAGE', description: 'Clogged storm drain, sewer overflow, street flooded', default_priority: 'HIGH', icon_name: 'Waves' },
-  { id: 6, name: 'Fallen Trees & Parks', code: 'FALLEN_TREE', description: 'Dangerous branch, fallen tree blocking road', default_priority: 'MEDIUM', icon_name: 'Trees' },
-  { id: 7, name: 'Stray Animals & Health', code: 'STRAY_ANIMALS', description: 'Injured animal, rabid stray dog pack, carcass removal', default_priority: 'MEDIUM', icon_name: 'Dog' },
-  { id: 8, name: 'Traffic & Signage', code: 'TRAFFIC_SIGNAL', description: 'Broken signal, knocked-down sign, road divider damage', default_priority: 'HIGH', icon_name: 'TrafficCone' },
+  { id: 1, name: 'Potholes & Road Damage', code: 'POTHOLE', description: 'Damaged asphalt, craters, or road cave-ins on municipal streets.', default_priority: 'HIGH' },
+  { id: 2, name: 'Streetlight Outage & Hazard', code: 'STREETLIGHT', description: 'Non-functional lights, dangling wires, or sparking transformers.', default_priority: 'MEDIUM' },
+  { id: 3, name: 'Garbage Dump & Waste Pile', code: 'GARBAGE_DUMP', description: 'Uncollected garbage, overflowing community bins, or illegal debris.', default_priority: 'MEDIUM' },
+  { id: 4, name: 'Water Pipeline Leakage', code: 'WATER_LEAK', description: 'Burst pipelines, continuous fresh water wastage, or contamination.', default_priority: 'HIGH' },
+  { id: 5, name: 'Sewer & Drain Overflow', code: 'SEWER_OVERFLOW', description: 'Blocked gutters, open manholes, or overflowing sewage on streets.', default_priority: 'HIGH' },
+  { id: 6, name: 'Traffic Light Failure', code: 'TRAFFIC_LIGHT', description: 'Broken traffic signals, missing zebra markings, or damaged signposts.', default_priority: 'HIGH' },
+  { id: 7, name: 'Fallen Tree & Branch Hazard', code: 'FALLEN_TREE', description: 'Uprooted trees obstructing roads or hazardous hanging branches.', default_priority: 'MEDIUM' },
+  { id: 8, name: 'Other Civic Problem', code: 'OTHER_CIVIC', description: 'Miscellaneous civic grievances requiring local body review.', default_priority: 'LOW' },
 ];
 
-const categoryIconMap: Record<string, React.ReactNode> = {
-  AlertTriangle: <AlertTriangle className="w-5 h-5 text-accent-500" />,
-  Lightbulb: <Lightbulb className="w-5 h-5 text-accent-500" />,
-  Trash: <Trash className="w-5 h-5 text-accent-500" />,
-  Droplets: <Droplets className="w-5 h-5 text-accent-500" />,
-  Waves: <Waves className="w-5 h-5 text-accent-500" />,
-  Trees: <Trees className="w-5 h-5 text-accent-500" />,
-  Dog: <Dog className="w-5 h-5 text-accent-500" />,
-  TrafficCone: <TrafficCone className="w-5 h-5 text-accent-500" />,
+const CATEGORY_IMAGES: Record<string, string> = {
+  POTHOLE: '/images/categories/pothole.jpg',
+  GARBAGE_DUMP: '/images/categories/garbage.jpg',
+  GARBAGE: '/images/categories/garbage.jpg',
+  FALLEN_TREE: '/images/categories/fallen_tree.jpg',
+  STREETLIGHT: '/images/categories/streetlight.jpg',
+  WATER_LEAK: '/images/categories/water_leak.jpg',
+  SEWER_OVERFLOW: '/images/categories/sewer_overflow.jpg',
+  DRAINAGE: '/images/categories/sewer_overflow.jpg',
+  TRAFFIC_LIGHT: '/images/categories/traffic_light.jpg',
+  TRAFFIC_SIGNAL: '/images/categories/traffic_light.jpg',
+  OTHER_CIVIC: '/images/categories/other_civic.jpg',
+};
+
+const getCategoryImageUrl = (cat: Category): string => {
+  const code = (cat.code || '').toUpperCase();
+  if (CATEGORY_IMAGES[code]) return CATEGORY_IMAGES[code];
+
+  const name = (cat.name || '').toLowerCase();
+  if (name.includes('pothole') || name.includes('road')) return '/images/categories/pothole.jpg';
+  if (name.includes('garbage') || name.includes('waste')) return '/images/categories/garbage.jpg';
+  if (name.includes('tree') || name.includes('branch')) return '/images/categories/fallen_tree.jpg';
+  if (name.includes('streetlight') || name.includes('light') || name.includes('electrical')) return '/images/categories/streetlight.jpg';
+  if (name.includes('water') || name.includes('pipeline')) return '/images/categories/water_leak.jpg';
+  if (name.includes('sewer') || name.includes('drain')) return '/images/categories/sewer_overflow.jpg';
+  if (name.includes('traffic') || name.includes('signal')) return '/images/categories/traffic_light.jpg';
+  return '/images/categories/other_civic.jpg';
 };
 
 const STEPS: Step[] = [
@@ -405,7 +416,7 @@ export const ReportIssuePage: React.FC = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {categories.map((cat) => {
                 const isSelected = selectedCategory?.id === cat.id;
                 return (
@@ -413,26 +424,36 @@ export const ReportIssuePage: React.FC = () => {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat)}
-                    className={`text-left p-4 rounded-lg border transition flex items-start gap-3.5 ${
+                    className={`text-left p-3.5 rounded-xl border transition-all duration-150 flex items-center gap-3.5 group cursor-pointer ${
                       isSelected
-                        ? 'border-primary-600 bg-primary-100/30 ring-1 ring-primary-600'
-                        : 'border-line hover:border-ink-300 bg-card hover:bg-surface'
+                        ? 'border-primary-600 bg-primary-100/40 ring-2 ring-primary-600 shadow-sm'
+                        : 'border-line hover:border-primary-600/50 bg-card hover:bg-surface hover:shadow-2xs'
                     }`}
                   >
-                    <div
-                      className={`p-2.5 rounded-lg border flex-shrink-0 ${
-                        isSelected
-                          ? 'bg-primary-600 text-white border-primary-600'
-                          : 'bg-surface text-ink-700 border-line'
-                      }`}
-                    >
-                      {categoryIconMap[cat.icon_name] || <AlertTriangle className="w-5 h-5" />}
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 border border-line bg-surface shadow-2xs">
+                      <img
+                        src={getCategoryImageUrl(cat)}
+                        alt={cat.name}
+                        className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-primary-900/25 ring-2 ring-inset ring-primary-600 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-xs">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-ink-950 leading-tight">
+                      <p
+                        className={`text-sm font-semibold leading-tight transition-colors ${
+                          isSelected ? 'text-primary-900 font-bold' : 'text-ink-950 group-hover:text-primary-700'
+                        }`}
+                      >
                         {cat.name}
                       </p>
-                      <p className="text-xs text-ink-500 mt-1 line-clamp-2">
+                      <p className="text-xs text-ink-500 mt-1 line-clamp-2 leading-relaxed">
                         {cat.description}
                       </p>
                     </div>
@@ -629,9 +650,18 @@ export const ReportIssuePage: React.FC = () => {
           <CardContent className="space-y-4">
             {/* Category & Priority review */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-surface rounded-lg border border-line">
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-ink-500 font-medium">Category</p>
-                <p className="text-sm font-semibold text-ink-950 mt-0.5">{selectedCategory?.name}</p>
+              <div className="flex items-center gap-3">
+                {selectedCategory && (
+                  <img
+                    src={getCategoryImageUrl(selectedCategory)}
+                    alt={selectedCategory.name}
+                    className="w-12 h-12 rounded-lg object-cover border border-line shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-wider text-ink-500 font-medium">Category</p>
+                  <p className="text-sm font-semibold text-ink-950 mt-0.5 truncate">{selectedCategory?.name}</p>
+                </div>
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-ink-500 font-medium">Priority Level</p>

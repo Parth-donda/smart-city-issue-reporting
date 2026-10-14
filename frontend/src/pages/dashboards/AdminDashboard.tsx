@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -8,16 +7,12 @@ import { StatusBadge, PriorityBadge } from '../../components/ui/Badge';
 import { api } from '../../services/api';
 import { Issue, IssueCategory } from '../../types/issues';
 import {
-  LogOut,
   Building2,
-  Layers,
-  Clock,
   ShieldCheck,
   Search,
   RefreshCw,
   Edit,
   Activity,
-  BarChart3,
   FileText,
   MapPin,
   User,
@@ -90,9 +85,27 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export const AdminDashboard: React.FC = () => {
-  const { logout } = useAuth();
+  const [searchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<AdminTab>('ISSUES');
+  const [activeTab, setActiveTab] = useState<AdminTab>(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'map' || tab === 'gis') return 'GIS_MAP';
+    if (tab === 'analytics') return 'ANALYTICS';
+    if (tab === 'routing' || tab === 'categories') return 'ROUTING';
+    if (tab === 'sla') return 'SLA_CONFIG';
+    if (tab === 'audit') return 'AUDIT_LOGS';
+    return 'ISSUES';
+  });
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'map' || tab === 'gis') setActiveTab('GIS_MAP');
+    else if (tab === 'analytics') setActiveTab('ANALYTICS');
+    else if (tab === 'routing' || tab === 'categories') setActiveTab('ROUTING');
+    else if (tab === 'sla') setActiveTab('SLA_CONFIG');
+    else if (tab === 'audit') setActiveTab('AUDIT_LOGS');
+    else if (tab === 'issues') setActiveTab('ISSUES');
+  }, [searchParams]);
   const [overview, setOverview] = useState<AdminOverviewData | null>(null);
   const [categories, setCategories] = useState<IssueCategory[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -264,9 +277,6 @@ export const AdminDashboard: React.FC = () => {
           >
             Refresh
           </Button>
-          <Button variant="ghost" size="sm" onClick={logout} leftIcon={<LogOut className="w-4 h-4" />}>
-            Sign Out
-          </Button>
         </div>
       </div>
 
@@ -327,76 +337,7 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex border-b border-line gap-2 text-xs font-semibold overflow-x-auto pb-1">
-        <button
-          onClick={() => setActiveTab('ISSUES')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'ISSUES'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          Civic Issues Registry ({overview?.total_issues ?? issues.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('GIS_MAP')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'GIS_MAP'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <Flame className="w-4 h-4 text-rose-600" />
-          City GIS Map & Heatmap
-        </button>
-        <button
-          onClick={() => setActiveTab('ANALYTICS')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'ANALYTICS'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4" />
-          Executive Analytics
-        </button>
-        <button
-          onClick={() => setActiveTab('ROUTING')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'ROUTING'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          Category Routing Engine
-        </button>
-        <button
-          onClick={() => setActiveTab('SLA_CONFIG')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'SLA_CONFIG'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          SLA Matrix Policy
-        </button>
-        <button
-          onClick={() => setActiveTab('AUDIT_LOGS')}
-          className={`px-4 py-2 rounded-t-lg transition flex items-center gap-2 ${
-            activeTab === 'AUDIT_LOGS'
-              ? 'bg-card text-primary-700 border-t-2 border-primary-700 border-x border-line -mb-px font-bold'
-              : 'text-ink-500 hover:text-ink-950 hover:bg-surface'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4" />
-          Master Audit Ledger ({filteredAuditLogs.length})
-        </button>
-      </div>
-
+      {/* Content views managed via sidebar menu and URL tabs */}
       {/* TAB 0: ALL CIVIC ISSUES */}
       {activeTab === 'ISSUES' && (
         <div className="space-y-4">
@@ -634,8 +575,8 @@ export const AdminDashboard: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={departmentChartData} margin={{ top: 10, right: 20, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8EF" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fontFamily: 'IBM Plex Mono' }} />
-                      <YAxis tick={{ fontSize: 11, fontFamily: 'IBM Plex Mono' }} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fontFamily: 'Inter' }} />
+                      <YAxis tick={{ fontSize: 11, fontFamily: 'Inter' }} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: '#0A1A2A',
@@ -711,7 +652,7 @@ export const AdminDashboard: React.FC = () => {
               <CardDescription>Active bodies maintaining city infrastructure</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto border border-line rounded-input">
+              <div className="overflow-x-auto no-scrollbar border border-line rounded-input">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="bg-surface font-mono text-[11px] text-ink-500 uppercase border-b border-line">
                     <tr>
@@ -759,7 +700,7 @@ export const AdminDashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto border border-line rounded-input">
+            <div className="overflow-x-auto no-scrollbar border border-line rounded-input">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-surface font-mono text-[11px] text-ink-500 uppercase border-b border-line">
                   <tr>
@@ -819,7 +760,7 @@ export const AdminDashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto border border-line rounded-input">
+            <div className="overflow-x-auto no-scrollbar border border-line rounded-input">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-surface font-mono text-[11px] text-ink-500 uppercase border-b border-line">
                   <tr>
@@ -890,7 +831,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto border border-line rounded-input max-h-[500px] overflow-y-auto">
+            <div className="overflow-x-auto no-scrollbar border border-line rounded-input max-h-[500px] overflow-y-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-surface font-mono text-[11px] text-ink-500 uppercase border-b border-line sticky top-0 z-10">
                   <tr>

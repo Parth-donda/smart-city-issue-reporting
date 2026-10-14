@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -61,6 +62,23 @@ export const OfficerDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('created_desc');
   const [displayMode, setDisplayMode] = useState<'TABLE' | 'GIS_MAP'>('TABLE');
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const view = searchParams.get('view');
+    const tab = searchParams.get('tab');
+    if (view === 'map') {
+      setDisplayMode('GIS_MAP');
+    } else if (view === 'queue') {
+      setDisplayMode('TABLE');
+    }
+    if (tab) {
+      const normalized = tab.toUpperCase();
+      if (['ALL', 'NEW_INTAKE', 'UNDER_REVIEW', 'ACCEPTED', 'ASSIGNED', 'IN_FIELD', 'SLA_BREACHED', 'REJECTED', 'REOPENED'].includes(normalized)) {
+        setActiveTab(normalized);
+      }
+    }
+  }, [searchParams]);
 
   // Triage Drawer state
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
@@ -403,7 +421,7 @@ export const OfficerDashboard: React.FC = () => {
       <Card>
         <CardContent className="p-4 space-y-3">
           {/* Top Row: Status Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-line">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 border-b border-line">
             {[
               { id: 'ALL', label: `All (${summary?.total || 0})` },
               { id: 'SUBMITTED', label: `New Intake (${summary?.submitted || 0})` },
@@ -531,130 +549,131 @@ export const OfficerDashboard: React.FC = () => {
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-surface/80 border-b border-line text-ink-500 font-mono uppercase text-[11px]">
-                  <th className="py-3 px-4 font-semibold">Issue Ref</th>
-                <th className="py-3 px-4 font-semibold">Title & Category</th>
-                <th className="py-3 px-4 font-semibold">Citizen / Location</th>
-                <th className="py-3 px-4 font-semibold">Priority</th>
-                <th className="py-3 px-4 font-semibold">Status</th>
-                <th className="py-3 px-4 font-semibold">SLA Countdown</th>
-                <th className="py-3 px-4 font-semibold">Worker</th>
-                <th className="py-3 px-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-ink-500 font-mono">
-                    Loading department grievance records...
-                  </td>
+                  <th className="py-2.5 px-3 font-semibold whitespace-nowrap">Issue Ref</th>
+                  <th className="py-2.5 px-3 font-semibold">Title & Category</th>
+                  <th className="py-2.5 px-3 font-semibold">Citizen / Location</th>
+                  <th className="py-2.5 px-3 font-semibold whitespace-nowrap">Priority</th>
+                  <th className="py-2.5 px-3 font-semibold whitespace-nowrap">Status</th>
+                  <th className="py-2.5 px-3 font-semibold whitespace-nowrap">SLA Countdown</th>
+                  <th className="py-2.5 px-3 font-semibold whitespace-nowrap">Worker</th>
+                  <th className="py-2.5 px-3 font-semibold text-right whitespace-nowrap">Actions</th>
                 </tr>
-              ) : issues.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-16 text-center">
-                    <div className="max-w-sm mx-auto space-y-2">
-                      <Inbox className="w-8 h-8 text-ink-300 mx-auto" />
-                      <p className="font-heading font-semibold text-sm text-ink-950">Queue is clear</p>
-                      <p className="text-xs text-ink-500">No issues currently match your search and filter parameters.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                issues.map((issue) => {
-                  const primaryImg = issue.primary_image?.image || (issue.images && issue.images[0]?.image);
+              </thead>
+              <tbody className="divide-y divide-line">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-ink-500 font-mono">
+                      Loading department grievance records...
+                    </td>
+                  </tr>
+                ) : issues.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-16 text-center">
+                      <div className="max-w-sm mx-auto space-y-2">
+                        <Inbox className="w-8 h-8 text-ink-300 mx-auto" />
+                        <p className="font-heading font-semibold text-sm text-ink-950">Queue is clear</p>
+                        <p className="text-xs text-ink-500">No issues currently match your search and filter parameters.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  issues.map((issue) => {
+                    const primaryImg = issue.primary_image?.image || (issue.images && issue.images[0]?.image);
 
-                  return (
-                    <tr
-                      key={issue.id}
-                      className="hover:bg-surface/60 transition-colors group cursor-pointer"
-                      onClick={() => handleOpenTriage(issue)}
-                    >
-                      {/* Ref ID */}
-                      <td className="py-3 px-4 font-mono font-bold text-primary-700 whitespace-nowrap">
-                        {issue.issue_id}
-                      </td>
+                    return (
+                      <tr
+                        key={issue.id}
+                        className="hover:bg-surface/60 transition-colors group cursor-pointer"
+                        onClick={() => handleOpenTriage(issue)}
+                      >
+                        {/* Ref ID */}
+                        <td className="py-2.5 px-3 font-mono font-bold text-primary-700 whitespace-nowrap">
+                          {issue.issue_id}
+                        </td>
 
-                      {/* Title & Preview */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3 max-w-xs">
-                          {primaryImg ? (
-                            <img
-                              src={primaryImg}
-                              alt=""
-                              className="w-10 h-10 rounded-input object-cover border border-line shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-input bg-surface border border-line flex items-center justify-center shrink-0 text-ink-300">
-                              <Building2 className="w-4 h-4" />
+                        {/* Title & Preview */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-2.5 max-w-[210px] sm:max-w-[240px]">
+                            {primaryImg ? (
+                              <img
+                                src={primaryImg}
+                                alt=""
+                                className="w-8 h-8 rounded-lg object-cover border border-line shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-surface border border-line flex items-center justify-center shrink-0 text-ink-300">
+                                <Building2 className="w-3.5 h-3.5" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-semibold text-ink-950 truncate leading-tight">{issue.title}</p>
+                              <span className="text-[11px] text-ink-500 truncate block mt-0.5">
+                                {issue.category?.name || 'General'}
+                              </span>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-semibold text-ink-950 truncate">{issue.title}</p>
-                            <span className="text-[11px] text-ink-500 truncate block">
-                              {issue.category?.name || 'General'}
-                            </span>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Citizen & Location */}
-                      <td className="py-3 px-4 max-w-[200px]">
-                        <p className="text-ink-950 font-medium truncate">{issue.citizen_name || 'Citizen'}</p>
-                        <p className="text-ink-500 text-[11px] truncate flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3 text-ink-400 shrink-0" />
-                          <span>{issue.location?.ward || issue.location?.address_text || 'Ward 1'}</span>
-                        </p>
-                      </td>
+                        {/* Citizen & Location */}
+                        <td className="py-2.5 px-3 max-w-[150px]">
+                          <p className="text-ink-950 font-medium truncate leading-tight">{issue.citizen_name || 'Citizen'}</p>
+                          <p className="text-ink-500 text-[11px] truncate flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-ink-400 shrink-0" />
+                            <span>{issue.location?.ward || issue.location?.address_text || 'Ward 1'}</span>
+                          </p>
+                        </td>
 
-                      {/* Priority */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <PriorityBadge priority={issue.priority as any} size="sm" />
-                      </td>
+                        {/* Priority */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <PriorityBadge priority={issue.priority as any} size="sm" />
+                        </td>
 
-                      {/* Status */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <StatusBadge status={issue.status as any} size="sm" />
-                      </td>
+                        {/* Status */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <StatusBadge status={issue.status as any} size="sm" />
+                        </td>
 
-                      {/* SLA Timer */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <SlaTimer deadline={issue.sla_deadline} status={issue.status} />
-                      </td>
+                        {/* SLA Timer */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <SlaTimer deadline={issue.sla_deadline} status={issue.status} />
+                        </td>
 
-                      {/* Assigned Worker */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        {issue.assigned_worker_name ? (
-                          <span className="font-mono text-xs text-ink-950 font-medium flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5 text-primary-600" />
-                            {issue.assigned_worker_name}
-                          </span>
-                        ) : (
-                          <span className="text-ink-300 font-mono text-xs">Unassigned</span>
-                        )}
-                      </td>
+                        {/* Assigned Worker */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {issue.assigned_worker_name ? (
+                            <span className="font-mono text-xs text-ink-950 font-medium flex items-center gap-1">
+                              <Users className="w-3.5 h-3.5 text-primary-600" />
+                              {issue.assigned_worker_name}
+                            </span>
+                          ) : (
+                            <span className="text-ink-300 font-mono text-xs">Unassigned</span>
+                          )}
+                        </td>
 
-                      {/* Action */}
-                      <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => handleOpenTriage(issue)}
-                          rightIcon={<ArrowRight className="w-3 h-3" />}
-                        >
-                          Review & Triage
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        {/* Action */}
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="px-2.5 py-1 text-xs"
+                            onClick={() => handleOpenTriage(issue)}
+                            rightIcon={<ArrowRight className="w-3 h-3" />}
+                          >
+                            Review
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
     </Card>
 
       {/* Comprehensive Triage & Work Order Assignment Drawer */}

@@ -51,42 +51,42 @@ export const HomePage: React.FC = () => {
       name: 'Roads & Pavements',
       desc: 'Potholes, broken footpaths, damaged dividers, sunken roads, and missing manhole covers.',
       sla: 'Within 24–48 hours',
-      image: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/pothole.jpg',
       division: 'Road Maintenance',
     },
     {
       name: 'Garbage & Sanitation',
       desc: 'Overflowing dumpsters, missed door-to-door trash collection, and unauthorized waste dumping.',
       sla: 'Within 12–24 hours',
-      image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/garbage.jpg',
       division: 'Waste Management',
     },
     {
       name: 'Water Supply & Drains',
       desc: 'Pipeline leaks, contaminated water, clogged storm drains, and open sewage overflow.',
       sla: 'Within 12–36 hours',
-      image: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/water_leak.jpg',
       division: 'Water & Sewage',
     },
     {
       name: 'Streetlights & Electricity',
       desc: 'Dark streetlights, exposed electrical wires, damaged feeder pillars, and power fluctuations.',
       sla: 'Within 12–24 hours',
-      image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/streetlight.jpg',
       division: 'Electrical Wing',
     },
     {
       name: 'Traffic & Signage',
       desc: 'Broken traffic signals, damaged road signs, missing safety mirrors, and fallen barriers.',
       sla: 'Within 6–12 hours',
-      image: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/traffic_light.jpg',
       division: 'Traffic Safety',
     },
     {
       name: 'Parks & Trees',
       desc: 'Fallen tree branches blocking roads, overgrown vegetation, and maintenance of public parks.',
       sla: 'Within 24–48 hours',
-      image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+      image: '/images/categories/fallen_tree.jpg',
       division: 'Parks & Greenery',
     },
   ];
@@ -337,7 +337,7 @@ export const HomePage: React.FC = () => {
                     placeholder="Enter Reference ID (e.g. SC-2026-00001)"
                     value={trackId}
                     onChange={(e) => setTrackId(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all"
+                    className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all"
                   />
                 </div>
                 <Button
@@ -393,96 +393,42 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Municipal Service Standards & Citizen Charter */}
-          <div className="lg:col-span-5 relative">
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md p-6 space-y-5">
-              
-              {/* Card Header */}
-              <div className="pb-3 border-b border-slate-100">
-                <h3 className="text-base font-heading font-bold text-slate-900">
-                  Municipal Service Standards
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Time-bound civic redressal commitments across city wards
-                </p>
+          {/* Right Column: Visual Smart Civic Operations Showcase */}
+          <div className="lg:col-span-5 relative flex items-center justify-center">
+            {/* Clean Framed Showcase Card */}
+            <div className="w-full bg-white rounded-2xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/15 transition-all duration-300 hover:-translate-y-1 group">
+              {/* Civic Hero Image (Fully Visible & Unobstructed) */}
+              <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-slate-100">
+                <img
+                  src="/images/hero_civic_city.jpg"
+                  alt="SmartCivic City Field Operations and Digital Governance"
+                  className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                />
               </div>
 
-              {/* Department Commitments List */}
-              <div className="space-y-2.5">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900">Roads & Infrastructure</span>
-                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
-                      Within 48h
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    Potholes, damaged tarmac, broken footpaths, and open utility trenches.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900">Water Supply & Sewerage</span>
-                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
-                      Within 24h
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    Pipeline bursts, contaminated tap water, low pressure, and sewer overflow.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900">Street Lighting & Electrical</span>
-                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
-                      Within 24h
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    Dark street corridors, non-functional sodium/LED fixtures, and loose cables.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/90 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900">Solid Waste & Sanitation</span>
-                    <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
-                      Within 12h
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    Overflowing community dumpsters, missed door-to-door collection, and litter.
-                  </p>
-                </div>
-              </div>
-
-              {/* Quality & Verification Protocol */}
-              <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium text-[11px]">Field Proof Standard:</span>
-                  <span className="text-emerald-700 font-semibold text-[11px]">Geotagged Before & After Photos</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium text-[11px]">Citizen Reopen Right:</span>
-                  <span className="text-slate-800 font-medium text-[11px]">Reopen within 48h if unsatisfied</span>
-                </div>
-              </div>
-
-              {/* Central Civic Control Room */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              {/* Dedicated Content Container (Both Image & Text Visible Properly) */}
+              <div className="p-5 space-y-3.5 bg-white">
                 <div>
-                  <div className="text-[11px] font-semibold text-slate-900">Central Municipal Control Room</div>
-                  <div className="text-xs text-slate-600">Helpline: <strong className="text-primary-700">1800-11-2026</strong> (Toll-Free, 24×7)</div>
+                  <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 leading-tight">
+                    Rapid Field Action & Transparent Oversight
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                    Connecting citizens, municipal officers, and field technicians across all city wards with photo & GPS verification.
+                  </p>
                 </div>
-                <Link to={reportLink} className="shrink-0">
-                  <Button variant="primary" size="sm" className="bg-primary-700 hover:bg-primary-800 text-white text-xs px-3.5 py-1.5 shadow-xs">
-                    File Complaint
-                  </Button>
-                </Link>
-              </div>
 
+                {/* Key Operational Commitments */}
+                <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2.5 text-xs">
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                    <span className="text-[10px] text-slate-500 block uppercase font-medium tracking-wider">Average SLA</span>
+                    <span className="font-bold text-slate-900 text-xs mt-0.5 block">24h–48h Turnaround</span>
+                  </div>
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                    <span className="text-[10px] text-slate-500 block uppercase font-medium tracking-wider">Proof Standard</span>
+                    <span className="font-bold text-emerald-700 text-xs mt-0.5 block">Before & After Proof</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -683,15 +629,24 @@ export const HomePage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           6. CALL TO ACTION BANNER
       ───────────────────────────────────────────────────────────── */}
-      <section className="bg-slate-50 py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+      <section className="bg-slate-100/60 py-20 lg:py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-200/80">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-800">
-            <div className="text-center max-w-2xl mx-auto space-y-6">
-              <h2 className="text-2xl sm:text-4xl font-heading font-bold text-white tracking-tight">
+          <div className="bg-white text-slate-900 rounded-3xl p-8 sm:p-14 shadow-xl shadow-slate-900/5 border border-slate-200/90 relative overflow-hidden">
+            {/* Subtle civic decorative ambient glows */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-teal-50/80 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary-100/40 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+
+            <div className="relative text-center max-w-2xl mx-auto space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/80 text-primary-800 text-xs font-semibold shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Active Citywide Civic Redressal
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-heading font-bold text-slate-900 tracking-tight leading-tight">
                 Help Us Keep Our City Clean and Safe
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
                 Whether you want to report a broken streetlight or track ongoing road repairs in your neighborhood, SmartCivic makes municipal maintenance open and accessible.
               </p>
 
@@ -702,7 +657,7 @@ export const HomePage: React.FC = () => {
                     variant="primary"
                     size="lg"
                     leftIcon={<FilePlus2 className="w-5 h-5 text-white" />}
-                    className="bg-primary-700 hover:bg-primary-600 text-white font-semibold px-6 py-3.5 text-sm sm:text-base shadow-sm transition-all"
+                    className="bg-primary-700 hover:bg-primary-800 text-white font-semibold px-6 py-3.5 text-sm sm:text-base shadow-sm transition-all"
                   >
                     Report an Issue Now
                   </Button>
@@ -712,8 +667,8 @@ export const HomePage: React.FC = () => {
                   <Button
                     variant="secondary"
                     size="lg"
-                    leftIcon={<UserPlus className="w-5 h-5 text-slate-900" />}
-                    className="bg-white hover:bg-slate-100 text-slate-900 font-semibold px-6 py-3.5 text-sm sm:text-base border border-slate-200 transition-all shadow-sm"
+                    leftIcon={<UserPlus className="w-5 h-5 text-slate-700" />}
+                    className="bg-white hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3.5 text-sm sm:text-base border border-slate-300 transition-all shadow-xs"
                   >
                     Create Citizen Account
                   </Button>
@@ -721,11 +676,11 @@ export const HomePage: React.FC = () => {
 
                 <Link
                   to="/track"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700 hover:text-primary-800 px-4 py-3 rounded-lg hover:bg-teal-50 transition-colors"
                 >
-                  <Search className="w-4 h-4 text-teal-400" />
+                  <Search className="w-4 h-4 text-primary-600" />
                   <span>Track Existing Ticket</span>
-                  <ArrowRight className="w-4 h-4 text-slate-400" />
+                  <ArrowRight className="w-4 h-4 text-primary-600" />
                 </Link>
               </div>
             </div>

@@ -70,9 +70,8 @@ SmartCivic is an evidence-based, location-aware civic issue management platform 
 ## 3. Strict Design Tokens
 
 - **Fonts**:
-  - Headings: `Bricolage Grotesque` (600, 700)
-  - Body/UI: `IBM Plex Sans` (400, 500, 600)
-  - Mono (IDs, hashes, coords, timestamps): `IBM Plex Mono` (500)
+  - Headings: `Plus Jakarta Sans` (600, 700)
+  - Body/UI & Identifiers: `Inter` (400, 500, 600, 700)
 - **Palette**:
   - Ink: `ink-950` (#0A1A2A), `ink-700` (#243B53), `ink-500` (#52667A), `ink-300` (#A7B4C2)
   - Line & Surface: `line` (#E2E8EF), `surface` (#F5F7FA), `card` (#FFFFFF)

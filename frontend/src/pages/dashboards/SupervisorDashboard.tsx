@@ -208,7 +208,7 @@ export const SupervisorDashboard: React.FC = () => {
           </span>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-surface/80 border-b border-line text-ink-500 font-mono uppercase text-[11px]">

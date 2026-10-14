@@ -13,7 +13,8 @@ import {
   Clock,
   CheckCircle2,
   Inbox,
-  LogOut
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
 import { UserRole } from '../../types/design-system';
 import { NotificationItem } from '../../types/issues';
@@ -28,6 +29,55 @@ export interface NavItem {
   href?: string;
   badge?: number;
 }
+
+const getFallbackNavForRole = (role?: string): NavItem[] => {
+  switch (role) {
+    case 'CITIZEN':
+      return [
+        { id: 'citizen-dashboard', label: 'All My Grievances', icon: FileText },
+        { id: 'report', label: 'File New Grievance', icon: Building2 },
+        { id: 'track', label: 'Track Reference ID', icon: Clock },
+        { id: 'home', label: 'Public Portal', icon: Inbox },
+      ];
+    case 'DEPARTMENT_OFFICER':
+      return [
+        { id: 'officer-dashboard', label: 'Command Triage Desk', icon: Inbox },
+        { id: 'officer-new', label: 'New Intake (Pending)', icon: FileText },
+        { id: 'officer-sla', label: 'SLA Breaches & Alerts', icon: AlertTriangle },
+        { id: 'officer-assigned', label: 'Field Crew Dispatches', icon: Users },
+        { id: 'officer-map', label: 'Ward GIS & Heatmap', icon: Building2 },
+        { id: 'home', label: 'Public Portal', icon: Inbox },
+      ];
+    case 'WORKER':
+      return [
+        { id: 'worker-active', label: 'Active Work Orders', icon: Inbox },
+        { id: 'worker-completed', label: 'Completed Repairs', icon: CheckCircle2 },
+        { id: 'home', label: 'Public Portal', icon: Building2 },
+      ];
+    case 'SUPERVISOR':
+      return [
+        { id: 'supervisor-dashboard', label: 'Quality Verification Desk', icon: ShieldCheck },
+        { id: 'home', label: 'Public Portal', icon: Building2 },
+      ];
+    case 'MUNICIPAL_ADMIN':
+    case 'SYSTEM_ADMIN':
+      return [
+        { id: 'admin-issues', label: 'City Grievance Master', icon: FileText },
+        { id: 'admin-map', label: 'GIS Hotspot Analysis', icon: Building2 },
+        { id: 'admin-analytics', label: 'Citywide Analytics', icon: BarChart3 },
+        { id: 'admin-routing', label: 'Automated Routing Engine', icon: Building2 },
+        { id: 'admin-sla', label: 'Department SLA Matrix', icon: Clock },
+        { id: 'admin-audit', label: 'Security & Audit Ledger', icon: ShieldCheck },
+        { id: 'home', label: 'Public Portal', icon: Inbox },
+      ];
+    default:
+      return [
+        { id: 'home', label: 'Civic Home', icon: Inbox },
+        { id: 'report', label: 'Report Civic Issue', icon: FileText },
+        { id: 'track', label: 'Track Grievance Status', icon: Clock },
+      ];
+  }
+};
 
 const NotificationPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -211,24 +261,52 @@ export interface AppShellProps {
   navItems?: NavItem[];
 }
 
-const DEFAULT_NAV: NavItem[] = [
-  { id: 'issues', label: 'Issues & Reports', icon: FileText, badge: 12 },
-  { id: 'departments', label: 'Departments', icon: Building2 },
-  { id: 'users', label: 'Team & Workers', icon: Users },
-  { id: 'analytics', label: 'City Analytics', icon: BarChart3 },
-];
-
 export const AppShell: React.FC<AppShellProps> = ({
   children,
   userRole = 'Municipal Admin',
   userName = 'Admin User',
   activeNavId = 'issues',
   onNavigate,
-  navItems = DEFAULT_NAV,
+  navItems,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const effectiveNavItems = (navItems && navItems.length > 0)
+    ? navItems
+    : getFallbackNavForRole(user?.role);
+
+  const handleNavClick = (id: string) => {
+    if (onNavigate) {
+      onNavigate(id);
+      return;
+    }
+    // Fallback role-based direct routing
+    switch (id) {
+      case 'home': navigate('/'); break;
+      case 'report': navigate('/report'); break;
+      case 'track': navigate('/track'); break;
+      case 'citizen-dashboard': navigate('/citizen'); break;
+      case 'citizen-active': navigate('/citizen?tab=in_progress'); break;
+      case 'citizen-resolved': navigate('/citizen?tab=resolved'); break;
+      case 'officer-dashboard': navigate('/officer?view=queue&tab=all'); break;
+      case 'officer-new': navigate('/officer?view=queue&tab=new_intake'); break;
+      case 'officer-sla': navigate('/officer?view=queue&tab=sla_breached'); break;
+      case 'officer-assigned': navigate('/officer?view=queue&tab=assigned'); break;
+      case 'officer-map': navigate('/officer?view=map'); break;
+      case 'worker-active': navigate('/worker?tab=active'); break;
+      case 'worker-completed': navigate('/worker?tab=completed'); break;
+      case 'supervisor-dashboard': navigate('/supervisor'); break;
+      case 'admin-issues': navigate('/admin?tab=issues'); break;
+      case 'admin-map': navigate('/admin?tab=map'); break;
+      case 'admin-analytics': navigate('/admin?tab=analytics'); break;
+      case 'admin-routing': navigate('/admin?tab=routing'); break;
+      case 'admin-sla': navigate('/admin?tab=sla'); break;
+      case 'admin-audit': navigate('/admin?tab=audit'); break;
+      default: navigate('/'); break;
+    }
+  };
 
   const handleSignOut = () => {
     logout();
@@ -249,22 +327,32 @@ export const AppShell: React.FC<AppShellProps> = ({
             <h1 className="font-heading font-bold text-lg tracking-tight text-ink-950">
               SmartCivic
             </h1>
-            <p className="text-[11px] text-ink-500 uppercase tracking-wider font-medium">
-              Civic Operations
+            <p className="text-[11px] text-primary-700 uppercase tracking-wider font-bold truncate max-w-[190px]">
+              {user?.role === 'CITIZEN'
+                ? 'Citizen Portal'
+                : user?.role === 'DEPARTMENT_OFFICER'
+                ? (user.department_code ? `${user.department_code} Command` : 'Officer Command')
+                : user?.role === 'WORKER'
+                ? 'Field Crew Operations'
+                : user?.role === 'SUPERVISOR'
+                ? 'Field Quality Audit'
+                : user?.role === 'MUNICIPAL_ADMIN' || user?.role === 'SYSTEM_ADMIN'
+                ? 'Municipal Governance'
+                : 'Civic Operations'}
             </p>
           </div>
         </div>
 
         {/* Navigation Items */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {effectiveNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.id === activeNavId;
 
             return (
               <button
                 key={item.id}
-                onClick={() => onNavigate?.(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-button text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 ${
                   isActive
                     ? 'bg-primary-100 text-primary-700 font-semibold'
@@ -340,11 +428,11 @@ export const AppShell: React.FC<AppShellProps> = ({
                 </button>
               </div>
               <nav className="flex-1 space-y-1">
-                {navItems.map((item) => (
+                {effectiveNavItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => {
-                      onNavigate?.(item.id);
+                      handleNavClick(item.id);
                       setIsMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-button text-sm font-medium ${

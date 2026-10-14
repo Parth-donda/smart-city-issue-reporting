@@ -12,7 +12,6 @@ import {
   Building2,
   Phone,
   Mail,
-  LayoutDashboard,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
@@ -56,7 +55,7 @@ const ROLE_DETAILS: Record<
 };
 
 export const UserProfileDropdown: React.FC = () => {
-  const { user, logout, updateProfile, getDashboardRoute } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -231,8 +230,6 @@ export const UserProfileDropdown: React.FC = () => {
                 )}
               </div>
             )}
-
-            
           </div>
 
           {/* Action Menu Items */}
@@ -246,8 +243,6 @@ export const UserProfileDropdown: React.FC = () => {
               <UserCog className="w-4 h-4 text-primary-700 shrink-0" />
               <span>Edit Profile Information</span>
             </button>
-
-            
           </div>
 
           {/* Sign Out Option */}

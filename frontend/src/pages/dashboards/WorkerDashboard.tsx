@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -24,7 +25,16 @@ export const WorkerDashboard: React.FC = () => {
   const { user } = useAuth();
 
   const [tasks, setTasks] = useState<Issue[]>([]);
-  const [activeTab, setActiveTab] = useState<'ACTIVE' | 'COMPLETED'>('ACTIVE');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'ACTIVE' | 'COMPLETED'>(() => {
+    return searchParams.get('tab') === 'completed' ? 'COMPLETED' : 'ACTIVE';
+  });
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'completed') setActiveTab('COMPLETED');
+    else if (tab === 'active') setActiveTab('ACTIVE');
+  }, [searchParams]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<Issue | null>(null);
 
@@ -159,36 +169,36 @@ export const WorkerDashboard: React.FC = () => {
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
       {/* Worker Profile Header */}
-      <div className="bg-primary-700 text-card rounded-card p-5 shadow-soft">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-card/10 border border-card/20 flex items-center justify-center text-card font-heading font-bold text-lg">
-              <Wrench className="w-6 h-6" />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-primary-700 shadow-xs shrink-0">
+              <Wrench className="w-6 h-6 text-primary-700" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs px-2 py-0.5 bg-card/20 text-card rounded-badge font-semibold">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs px-2.5 py-0.5 bg-teal-100/80 text-teal-800 rounded-md font-semibold border border-teal-200/60">
                   FIELD TECHNICIAN
                 </span>
-                <span className="text-xs text-primary-100 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   Dept: {user?.worker_profile?.department_name || user?.department_name || 'Roads & Infrastructure'}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-heading font-bold mt-1">
+              <h1 className="text-xl sm:text-2xl font-heading font-bold text-slate-900 mt-1">
                 {user?.first_name || user?.username} {user?.last_name || ''}
               </h1>
-              <p className="text-xs text-primary-100 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 Skills: {user?.worker_profile?.skills || 'General civic field operations & repairs'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               variant="secondary"
               size="sm"
               onClick={fetchTasks}
-              className="bg-card/15 text-card hover:bg-card/25 border-card/30"
-              leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+              className="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 shadow-xs font-medium"
+              leftIcon={<RefreshCw className="w-3.5 h-3.5 text-slate-500" />}
             >
               Refresh Tasks
             </Button>

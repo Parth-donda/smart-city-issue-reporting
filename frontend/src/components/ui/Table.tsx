@@ -6,7 +6,7 @@ export const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> = ({
   ...props
 }) => {
   return (
-    <div className="w-full overflow-x-auto border border-line rounded-card bg-card shadow-soft">
+    <div className="w-full overflow-x-auto no-scrollbar border border-line rounded-card bg-card shadow-soft">
       <table className={`w-full text-left text-sm text-ink-950 ${className}`} {...props}>
         {children}
       </table>

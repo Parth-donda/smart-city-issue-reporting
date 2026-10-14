@@ -1,7 +1,24 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Home, FilePlus2, Search, LayoutDashboard } from 'lucide-react';
+import {
+  Home,
+  FilePlus2,
+  Search,
+  Inbox,
+  FolderKanban,
+  MapPin,
+  Wrench,
+  CheckCircle2,
+  ShieldCheck,
+  FileText,
+  Layers,
+  Clock,
+  LogIn,
+  Flame,
+  BarChart3,
+  Users
+} from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppShell, NavItem } from './components/layout/AppShell';
@@ -33,46 +50,188 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const getActiveId = () => {
     const path = location.pathname;
+    const search = location.search;
+
     if (path === '/') return 'home';
     if (path.startsWith('/report')) return 'report';
     if (path.startsWith('/track')) return 'track';
-    if (path.includes('citizen')) return 'citizen-dashboard';
-    if (path.includes('officer')) return 'officer-dashboard';
-    if (path.includes('worker')) return 'worker-dashboard';
+
+    if (path.includes('citizen')) {
+      if (search.includes('tab=resolved')) return 'citizen-resolved';
+      if (search.includes('tab=in_progress') || search.includes('tab=under_review')) return 'citizen-active';
+      return 'citizen-dashboard';
+    }
+
+    if (path.includes('officer')) {
+      if (search.includes('view=map')) return 'officer-map';
+      if (search.includes('tab=new_intake') || search.includes('tab=new')) return 'officer-new';
+      if (search.includes('tab=sla_breached') || search.includes('tab=sla')) return 'officer-sla';
+      if (search.includes('tab=assigned') || search.includes('tab=in_field')) return 'officer-assigned';
+      return 'officer-dashboard';
+    }
+
+    if (path.includes('worker')) {
+      if (search.includes('tab=completed')) return 'worker-completed';
+      return 'worker-active';
+    }
+
     if (path.includes('supervisor')) return 'supervisor-dashboard';
-    if (path.includes('admin')) return 'admin-dashboard';
+
+    if (path.includes('admin')) {
+      if (search.includes('tab=map') || search.includes('tab=gis')) return 'admin-map';
+      if (search.includes('tab=analytics')) return 'admin-analytics';
+      if (search.includes('tab=routing') || search.includes('tab=categories')) return 'admin-routing';
+      if (search.includes('tab=sla')) return 'admin-sla';
+      if (search.includes('tab=audit')) return 'admin-audit';
+      return 'admin-issues';
+    }
+
     return 'home';
   };
 
   const handleNav = (id: string) => {
-    if (id === 'home') navigate('/');
-    else if (id === 'report') navigate(user ? '/report' : '/login?redirect=/report');
-    else if (id === 'track') navigate('/track');
-    else if (id === 'citizen-dashboard') navigate('/citizen');
-    else if (id === 'officer-dashboard') navigate('/officer');
-    else if (id === 'worker-dashboard') navigate('/worker');
-    else if (id === 'supervisor-dashboard') navigate('/supervisor');
-    else if (id === 'admin-dashboard') navigate('/admin');
-    else if (id === 'dashboard') {
-      if (user) {
-        const role = user.role;
-        if (role === 'CITIZEN') navigate('/citizen');
-        else if (role === 'DEPARTMENT_OFFICER') navigate('/officer');
-        else if (role === 'WORKER') navigate('/worker');
-        else if (role === 'SUPERVISOR') navigate('/supervisor');
-        else navigate('/admin');
-      } else {
+    switch (id) {
+      case 'home':
+        navigate('/');
+        break;
+      case 'report':
+        navigate(user ? '/report' : '/login?redirect=/report');
+        break;
+      case 'track':
+        navigate('/track');
+        break;
+      case 'login':
         navigate('/login');
-      }
+        break;
+
+      // Citizen
+      case 'citizen-dashboard':
+        navigate('/citizen');
+        break;
+      case 'citizen-active':
+        navigate('/citizen?tab=in_progress');
+        break;
+      case 'citizen-resolved':
+        navigate('/citizen?tab=resolved');
+        break;
+
+      // Officer
+      case 'officer-dashboard':
+        navigate('/officer?view=queue&tab=all');
+        break;
+      case 'officer-new':
+        navigate('/officer?view=queue&tab=new_intake');
+        break;
+      case 'officer-sla':
+        navigate('/officer?view=queue&tab=sla_breached');
+        break;
+      case 'officer-assigned':
+        navigate('/officer?view=queue&tab=assigned');
+        break;
+      case 'officer-map':
+        navigate('/officer?view=map');
+        break;
+
+      // Worker
+      case 'worker-active':
+        navigate('/worker?tab=active');
+        break;
+      case 'worker-completed':
+        navigate('/worker?tab=completed');
+        break;
+
+      // Supervisor
+      case 'supervisor-dashboard':
+        navigate('/supervisor');
+        break;
+
+      // Admin
+      case 'admin-issues':
+        navigate('/admin?tab=issues');
+        break;
+      case 'admin-map':
+        navigate('/admin?tab=map');
+        break;
+      case 'admin-analytics':
+        navigate('/admin?tab=analytics');
+        break;
+      case 'admin-routing':
+        navigate('/admin?tab=routing');
+        break;
+      case 'admin-sla':
+        navigate('/admin?tab=sla');
+        break;
+      case 'admin-audit':
+        navigate('/admin?tab=audit');
+        break;
+
+      default:
+        navigate('/');
     }
   };
 
-  const navItems: NavItem[] = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'report', label: 'Report Issue', icon: FilePlus2 },
-    { id: 'track', label: 'Track Status', icon: Search },
-    { id: 'dashboard', label: user ? 'My Workspace' : 'Sign In / Portal', icon: LayoutDashboard },
-  ];
+  const getNavItems = (): NavItem[] => {
+    switch (user?.role) {
+      case 'CITIZEN':
+        return [
+          { id: 'citizen-dashboard', label: 'All My Grievances', icon: FolderKanban },
+          { id: 'citizen-active', label: 'In Progress / Active', icon: Clock },
+          { id: 'citizen-resolved', label: 'Resolved Tickets', icon: CheckCircle2 },
+          { id: 'report', label: 'File New Grievance', icon: FilePlus2 },
+          { id: 'track', label: 'Track Reference ID', icon: Search },
+          { id: 'home', label: 'Public Portal', icon: Home },
+        ];
+
+      case 'DEPARTMENT_OFFICER':
+        return [
+          { id: 'officer-dashboard', label: 'Command Triage Desk', icon: Inbox },
+          { id: 'officer-new', label: 'New Intake (Pending)', icon: FileText },
+          { id: 'officer-sla', label: 'SLA Breaches & Alerts', icon: Clock },
+          { id: 'officer-assigned', label: 'Field Crew Dispatches', icon: Users },
+          { id: 'officer-map', label: 'Ward GIS & Heatmap', icon: MapPin },
+          { id: 'track', label: 'Track Reference ID', icon: Search },
+          { id: 'home', label: 'Public Portal', icon: Home },
+        ];
+
+      case 'WORKER':
+        return [
+          { id: 'worker-active', label: 'Active Work Orders', icon: Wrench },
+          { id: 'worker-completed', label: 'Completed Repairs', icon: CheckCircle2 },
+          { id: 'track', label: 'Track Reference ID', icon: Search },
+          { id: 'home', label: 'Public Portal', icon: Home },
+        ];
+
+      case 'SUPERVISOR':
+        return [
+          { id: 'supervisor-dashboard', label: 'Quality Verification Desk', icon: ShieldCheck },
+          { id: 'track', label: 'Track Reference ID', icon: Search },
+          { id: 'home', label: 'Public Portal', icon: Home },
+        ];
+
+      case 'MUNICIPAL_ADMIN':
+      case 'SYSTEM_ADMIN':
+        return [
+          { id: 'admin-issues', label: 'City Grievance Master', icon: FileText },
+          { id: 'admin-map', label: 'GIS Hotspot Analysis', icon: Flame },
+          { id: 'admin-analytics', label: 'Citywide Analytics', icon: BarChart3 },
+          { id: 'admin-routing', label: 'Automated Routing Engine', icon: Layers },
+          { id: 'admin-sla', label: 'Department SLA Matrix', icon: Clock },
+          { id: 'admin-audit', label: 'Security & Audit Ledger', icon: ShieldCheck },
+          { id: 'track', label: 'Track Reference ID', icon: Search },
+          { id: 'home', label: 'Public Portal', icon: Home },
+        ];
+
+      default:
+        return [
+          { id: 'home', label: 'Civic Home', icon: Home },
+          { id: 'report', label: 'Report Civic Issue', icon: FilePlus2 },
+          { id: 'track', label: 'Track Grievance Status', icon: Search },
+          { id: 'login', label: 'Officer / Staff Portal', icon: LogIn },
+        ];
+    }
+  };
+
+  const navItems = getNavItems();
 
   return (
     <>
@@ -85,7 +244,7 @@ const ShellWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       >
         {children}
       </AppShell>
-      <MobileBottomNav activeId={getActiveId()} onChange={handleNav} />
+      <MobileBottomNav activeId={getActiveId()} onChange={handleNav} items={navItems} />
     </>
   );
 };

@@ -31,7 +31,7 @@ class RegisterView(generics.CreateAPIView):
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
             },
-            "message": "Citizen registration successful."
+            "message": "Registration successful."
         }, status=status.HTTP_201_CREATED)
 
 

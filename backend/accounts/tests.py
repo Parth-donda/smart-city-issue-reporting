@@ -50,6 +50,22 @@ class AuthAndRBACTests(TestCase):
         self.assertIn('access', response.data['tokens'])
         self.assertEqual(response.data['user']['role'], Role.CITIZEN)
 
+    def test_officer_registration_with_role(self):
+        url = reverse('accounts:register')
+        payload = {
+            'username': 'new_officer',
+            'email': 'new_officer@test.local',
+            'password': 'StrongPassword123!',
+            'password_confirm': 'StrongPassword123!',
+            'first_name': 'Officer',
+            'last_name': 'Sharma',
+            'role': Role.DEPARTMENT_OFFICER,
+            'phone': '9876543211'
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['user']['role'], Role.DEPARTMENT_OFFICER)
+
     def test_jwt_login_and_me_endpoint(self):
         url = reverse('accounts:login')
         response = self.client.post(url, {'username': 'test_citizen', 'password': 'Password123!'}, format='json')

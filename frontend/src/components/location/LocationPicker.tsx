@@ -92,30 +92,121 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     return defaultCenter;
   }, [value.latitude, value.longitude, defaultCenter]);
 
-  // Reverse geocode lat/lng to readable address
+  // Fast LRU/Map Cache and AbortController to prevent slow or stuck geocoding
+  const geocodeCache = useRef<Map<string, { addressText: string; ward: string }>>(new Map());
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
+
+  // Reverse geocode lat/lng to readable address with fast multi-tier resolution & caching
   const reverseGeocode = async (lat: number, lng: number) => {
+    const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+
+    // 1. Instant 0ms cache check
+    if (geocodeCache.current.has(cacheKey)) {
+      const cached = geocodeCache.current.get(cacheKey)!;
+      onChange({
+        ...value,
+        latitude: lat,
+        longitude: lng,
+        addressText: value.addressText || cached.addressText,
+        ward: value.ward || cached.ward,
+      });
+      setIsGeocoding(false);
+      return;
+    }
+
+    // Cancel any previous pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsGeocoding(true);
+
+    // Timeout safety: guarantee isGeocoding resolves and never hangs
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      setIsGeocoding(false);
+    }, 2500);
+
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        const address = data.display_name || '';
-        const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.city_district || '';
-        
+      // 2. High-speed client reverse geocode API (<250ms)
+      const fastUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+      const res = await fetch(fastUrl, { signal: controller.signal });
+
+      if (res.ok) {
+        clearTimeout(timeoutId);
+        const data = await res.json();
+        const locality = data.locality || data.city || '';
+        const fullAddress = [data.locality, data.city, data.principalSubdivision, data.countryName]
+          .filter(Boolean)
+          .join(', ');
+        const wardName = locality ? `Ward - ${locality}` : '';
+
+        const resolved = {
+          addressText: fullAddress || `Location near ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+          ward: wardName || value.ward,
+        };
+
+        geocodeCache.current.set(cacheKey, resolved);
+
         onChange({
           ...value,
-          latitude: Number(lat.toFixed(6)),
-          longitude: Number(lng.toFixed(6)),
-          addressText: value.addressText || address,
-          ward: value.ward || (suburb ? `Ward - ${suburb}` : value.ward),
+          latitude: lat,
+          longitude: lng,
+          addressText: value.addressText || resolved.addressText,
+          ward: value.ward || resolved.ward,
         });
+        setIsGeocoding(false);
+        return;
       }
     } catch {
-      // Fallback silently if offline or geocoder blocked
+      // Fast API aborted or network error, attempt fallback
+    }
+
+    // 3. Fallback to Nominatim if not aborted
+    try {
+      if (!controller.signal.aborted) {
+        const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        const nomRes = await fetch(nomUrl, {
+          headers: { 'Accept-Language': 'en' },
+          signal: controller.signal,
+        });
+
+        if (nomRes.ok) {
+          clearTimeout(timeoutId);
+          const data = await nomRes.json();
+          const address = data.display_name || '';
+          const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.city_district || '';
+
+          const resolved = {
+            addressText: address,
+            ward: suburb ? `Ward - ${suburb}` : value.ward,
+          };
+
+          geocodeCache.current.set(cacheKey, resolved);
+
+          onChange({
+            ...value,
+            latitude: lat,
+            longitude: lng,
+            addressText: value.addressText || resolved.addressText,
+            ward: value.ward || resolved.ward,
+          });
+        }
+      }
+    } catch {
+      // Fallback silently
     } finally {
+      clearTimeout(timeoutId);
       setIsGeocoding(false);
     }
   };
@@ -123,12 +214,21 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const handleCoordsChange = (lat: number, lng: number) => {
     const cleanLat = Number(lat.toFixed(6));
     const cleanLng = Number(lng.toFixed(6));
+
+    // Instantly propagate coordinates so pin and state are updated immediately
     onChange({
       ...value,
       latitude: cleanLat,
       longitude: cleanLng,
     });
-    reverseGeocode(cleanLat, cleanLng);
+
+    // Debounce reverse geocoding to prevent excessive network spam on drag/clicks
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      reverseGeocode(cleanLat, cleanLng);
+    }, 150);
   };
 
   // Fallback: estimate location via Network IP if device GPS is blocked
